@@ -1,1 +1,137 @@
+#!pip install pandas scikit-learn matplotlib
+# Import necessary libraries
+import pandas as pd
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
 
+# Load the dataset
+df = pd.read_csv("Wine dataset.csv")
+
+# Remove extra spaces from column names
+df.columns = df.columns.str.strip()
+
+# Display column names
+print(df.keys())
+
+# Display unique wine classes
+print(df['class'].unique())
+
+# Check missing values
+print(df.isnull().sum())
+
+# Separate input features and target
+X = df.drop('class', axis=1)
+y = df['class']
+
+# Standardize the input features
+sc = StandardScaler()
+X = sc.fit_transform(X)
+
+# Apply PCA
+pca = PCA()
+X_pca = pca.fit_transform(X)
+
+# Calculate explained variance ratio
+explained_variance_ratio = pca.explained_variance_ratio_
+
+# Plot cumulative explained variance
+plt.plot(
+    range(1, len(explained_variance_ratio) + 1),
+    explained_variance_ratio.cumsum(),
+    marker='o',
+    linestyle='--'
+)
+
+plt.xlabel('Number of Principal Components')
+plt.ylabel('Cumulative Explained Variance')
+plt.title('Explained Variance Ratio')
+plt.grid()
+plt.show()
+
+# Reduce the dataset to two principal components
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X)
+
+# Display explained variance
+print("Explained Variance Ratio:", pca.explained_variance_ratio_)
+print("Total Explained Variance:", pca.explained_variance_ratio_.sum())
+
+# Visualize all three wine classes
+plt.figure(figsize=(8, 6))
+
+for wine_class in sorted(y.unique()):
+    indices = y == wine_class
+
+    plt.scatter(
+        X_pca[indices, 0],
+        X_pca[indices, 1],
+        label=f'Class {wine_class}'
+    )
+
+plt.xlabel('Principal Component 1')
+plt.ylabel('Principal Component 2')
+plt.title('PCA: Wine Classification')
+plt.legend()
+plt.grid()
+plt.show()
+# THEORY
+# Principal Component Analysis (PCA) is an unsupervised machine learning technique
+# used for dimensionality reduction.
+# It reduces the number of features while retaining maximum possible variance.
+# PCA transforms original features into new variables called principal components.
+# StandardScaler is used to standardize the features before applying PCA.
+# Principal components are used to simplify high-dimensional data.
+# Explained variance indicates how much information is retained by each component.
+# PCA helps visualize and identify patterns among different wine classes.
+
+# Import pandas library to load and handle the wine dataset.
+# Import PCA from sklearn to perform Principal Component Analysis.
+# Import StandardScaler to standardize the dataset features.
+# Import matplotlib.pyplot to create graphs and visualizations.
+
+# Load the Wine.csv dataset from the specified file location.
+# Display all column names present in the dataset.
+# Display the unique wine classes available in the dataset.
+# Check the dataset for missing values in each column.
+
+# Separate the independent variables (chemical measurements) from the target variable.
+# Store all 13 chemical measurements in the input variable X.
+# Store the wine class labels in the target variable y.
+
+# Create an object of StandardScaler to standardize the input features.
+# Transform the features so that they have a mean of approximately zero and a standard deviation of one.
+
+# Create a PCA object to perform Principal Component Analysis.
+# Transform the standardized features into principal components.
+# Calculate the amount of variance explained by each principal component.
+
+# Plot the cumulative explained variance to understand how much information
+# is retained when different numbers of principal components are selected.
+# Set the X-axis to represent the number of principal components.
+# Set the Y-axis to represent cumulative explained variance.
+# Display markers at each component and use a dashed line to connect them.
+# Add a label to the X-axis.
+# Add a label to the Y-axis.
+# Add a title to the graph.
+# Display grid lines for better readability.
+# Display the cumulative explained variance graph.
+
+# Create a new PCA object to reduce the original 13 features to two principal components.
+# Transform the standardized dataset into two principal components.
+# Display the explained variance ratio of the first two principal components.
+# Calculate and display the total variance retained by these two components.
+
+# Create a figure for visualizing the wine classes.
+# Repeat the visualization process for each unique wine class.
+# Select the samples belonging to the current wine class.
+# Plot the first principal component on the X-axis.
+# Plot the second principal component on the Y-axis.
+# Assign a separate label to each wine class.
+
+# Label the X-axis as Principal Component 1.
+# Label the Y-axis as Principal Component 2.
+# Add a title to the PCA scatter plot.
+# Display the legend to identify the three wine classes.
+# Display grid lines for better readability.
+# Display the final PCA scatter plot.
