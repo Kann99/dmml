@@ -1,0 +1,642 @@
+# 1. IMPORT NECESSARY LIBRARIES
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression, Ridge, Lasso
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
+
+
+# 2. LOAD DATASET
+
+df = pd.read_csv("uberr.csv")
+
+print("First 5 Rows:")
+print(df.head())
+
+print("\nDataset Shape:")
+print(df.shape)
+
+print("\nMissing Values:")
+print(df.isnull().sum())
+
+
+# 3. PRE-PROCESSING
+
+# Remove unnecessary column
+if "Unnamed: 0" in df.columns:
+    df.drop("Unnamed: 0", axis=1, inplace=True)
+
+# Convert datetime column
+df["pickup_datetime"] = pd.to_datetime(
+    df["pickup_datetime"], errors="coerce"
+)
+
+# Remove missing values
+df.dropna(inplace=True)
+
+# Remove invalid values
+df = df[df["fare_amount"] > 0]
+df = df[df["passenger_count"].between(1, 6)]
+
+# Remove invalid coordinates
+df = df[
+    df["pickup_latitude"].between(-90, 90) &
+    df["dropoff_latitude"].between(-90, 90) &
+    df["pickup_longitude"].between(-180, 180) &
+    df["dropoff_longitude"].between(-180, 180)
+]
+
+print("\nData After Preprocessing:")
+print(df.head())
+
+print("\nShape After Preprocessing:")
+print(df.shape)
+
+
+# 4. CALCULATE DISTANCE USING HAVERSINE FORMULA
+
+lat1 = np.radians(df["pickup_latitude"])
+lon1 = np.radians(df["pickup_longitude"])
+
+lat2 = np.radians(df["dropoff_latitude"])
+lon2 = np.radians(df["dropoff_longitude"])
+
+dlat = lat2 - lat1
+dlon = lon2 - lon1
+
+a = (
+    np.sin(dlat / 2) ** 2 +
+    np.cos(lat1) * np.cos(lat2) *
+    np.sin(dlon / 2) ** 2
+)
+
+a = np.clip(a, 0, 1)
+
+c = 2 * np.arcsin(np.sqrt(a))
+
+# Distance in kilometres
+df["distance"] = 6371 * c
+
+print("\nCalculated Distance:")
+print(df[["distance"]].head())
+
+
+# 5. IDENTIFY OUTLIERS
+
+plt.figure(figsize=(8, 5))
+sns.boxplot(x=df["fare_amount"])
+plt.title("Fare Amount Before Outlier Removal")
+plt.show()
+
+plt.figure(figsize=(8, 5))
+sns.boxplot(x=df["distance"])
+plt.title("Distance Before Outlier Removal")
+plt.show()
+
+
+# 6. REMOVE OUTLIERS USING IQR
+
+Q1 = df["fare_amount"].quantile(0.25)
+Q3 = df["fare_amount"].quantile(0.75)
+
+IQR = Q3 - Q1
+
+lower = Q1 - 1.5 * IQR
+upper = Q3 + 1.5 * IQR
+
+print("\nQ1:", Q1)
+print("Q3:", Q3)
+print("IQR:", IQR)
+print("Lower Limit:", lower)
+print("Upper Limit:", upper)
+
+# Remove fare outliers
+df = df[
+    (df["fare_amount"] >= lower) &
+    (df["fare_amount"] <= upper)
+]
+
+# Remove zero-distance rides
+df = df[df["distance"] > 0]
+
+print("\nShape After Removing Outliers:")
+print(df.shape)
+
+
+# 7. BOX PLOT AFTER OUTLIER REMOVAL
+
+plt.figure(figsize=(8, 5))
+sns.boxplot(x=df["fare_amount"])
+plt.title("Fare Amount After Outlier Removal")
+plt.show()
+
+
+# 8. CHECK CORRELATION
+
+correlation = df[[
+    "fare_amount",
+    "passenger_count",
+    "pickup_longitude",
+    "pickup_latitude",
+    "dropoff_longitude",
+    "dropoff_latitude",
+    "distance"
+]].corr()
+
+print("\nCorrelation Matrix:")
+print(correlation)
+
+
+# 9. CORRELATION HEATMAP
+
+plt.figure(figsize=(10, 7))
+
+sns.heatmap(
+    correlation,
+    annot=True,
+    cmap="coolwarm"
+)
+
+plt.title("Correlation Heatmap")
+plt.show()
+
+
+# 10. SELECT FEATURES AND TARGET
+
+X = df[[
+    "passenger_count",
+    "pickup_longitude",
+    "pickup_latitude",
+    "dropoff_longitude",
+    "dropoff_latitude",
+    "distance"
+]]
+
+y = df["fare_amount"]
+
+
+# 11. TRAIN TEST SPLIT
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    random_state=42
+)
+
+print("\nTraining Data:", X_train.shape)
+print("Testing Data:", X_test.shape)
+
+
+# 12. LINEAR REGRESSION
+
+linear_model = LinearRegression()
+
+linear_model.fit(X_train, y_train)
+
+linear_pred = linear_model.predict(X_test)
+
+linear_r2 = r2_score(y_test, linear_pred)
+linear_rmse = np.sqrt(mean_squared_error(y_test, linear_pred))
+linear_mae = mean_absolute_error(y_test, linear_pred)
+
+print("\n----- LINEAR REGRESSION -----")
+print("R2 Score:", linear_r2)
+print("RMSE:", linear_rmse)
+print("MAE:", linear_mae)
+
+
+# 13. RIDGE REGRESSION
+
+ridge_model = make_pipeline(
+    StandardScaler(),
+    Ridge(alpha=1.0)
+)
+
+ridge_model.fit(X_train, y_train)
+
+ridge_pred = ridge_model.predict(X_test)
+
+ridge_r2 = r2_score(y_test, ridge_pred)
+ridge_rmse = np.sqrt(mean_squared_error(y_test, ridge_pred))
+ridge_mae = mean_absolute_error(y_test, ridge_pred)
+
+print("\n----- RIDGE REGRESSION -----")
+print("R2 Score:", ridge_r2)
+print("RMSE:", ridge_rmse)
+print("MAE:", ridge_mae)
+
+
+# 14. LASSO REGRESSION
+
+lasso_model = make_pipeline(
+    StandardScaler(),
+    Lasso(alpha=0.01, max_iter=10000)
+)
+
+lasso_model.fit(X_train, y_train)
+
+lasso_pred = lasso_model.predict(X_test)
+
+lasso_r2 = r2_score(y_test, lasso_pred)
+lasso_rmse = np.sqrt(mean_squared_error(y_test, lasso_pred))
+lasso_mae = mean_absolute_error(y_test, lasso_pred)
+
+print("\n----- LASSO REGRESSION -----")
+print("R2 Score:", lasso_r2)
+print("RMSE:", lasso_rmse)
+print("MAE:", lasso_mae)
+
+
+# 15. MODEL COMPARISON
+
+results = pd.DataFrame({
+    "Model": [
+        "Linear Regression",
+        "Ridge Regression",
+        "Lasso Regression"
+    ],
+
+    "R2 Score": [
+        linear_r2,
+        ridge_r2,
+        lasso_r2
+    ],
+
+    "RMSE": [
+        linear_rmse,
+        ridge_rmse,
+        lasso_rmse
+    ],
+
+    "MAE": [
+        linear_mae,
+        ridge_mae,
+        lasso_mae
+    ]
+})
+
+print("\n========== MODEL COMPARISON ==========")
+print(results)
+
+
+# 16. MODEL COMPARISON GRAPH
+
+results.set_index("Model")[[
+    "R2 Score",
+    "RMSE",
+    "MAE"
+]].plot(
+    kind="bar",
+    figsize=(10, 6)
+)
+
+plt.title("Regression Model Comparison")
+plt.ylabel("Score")
+plt.xticks(rotation=0)
+plt.grid(axis="y")
+plt.show()
+
+
+# 17. ACTUAL VS PREDICTED FARE
+
+plt.figure(figsize=(8, 6))
+
+plt.scatter(
+    y_test,
+    linear_pred,
+    alpha=0.5
+)
+
+plt.xlabel("Actual Fare")
+plt.ylabel("Predicted Fare")
+plt.title("Actual vs Predicted Fare")
+
+plt.show()
+
+
+# 18. PREDICT NEW UBER FARE
+
+# New ride details
+passenger_count = 2
+
+pickup_longitude = -73.985
+pickup_latitude = 40.748
+
+dropoff_longitude = -73.975
+dropoff_latitude = 40.758
+
+# Calculate distance
+lat1 = np.radians(pickup_latitude)
+lon1 = np.radians(pickup_longitude)
+
+lat2 = np.radians(dropoff_latitude)
+lon2 = np.radians(dropoff_longitude)
+
+dlat = lat2 - lat1
+dlon = lon2 - lon1
+
+a = (
+    np.sin(dlat / 2) ** 2 +
+    np.cos(lat1) * np.cos(lat2) *
+    np.sin(dlon / 2) ** 2
+)
+
+a = np.clip(a, 0, 1)
+
+c = 2 * np.arcsin(np.sqrt(a))
+
+distance = 6371 * c
+
+# Prepare new ride data
+new_ride = pd.DataFrame([[
+    passenger_count,
+    pickup_longitude,
+    pickup_latitude,
+    dropoff_longitude,
+    dropoff_latitude,
+    distance
+]], columns=X.columns)
+
+# Predict fare
+predicted_fare = linear_model.predict(new_ride)
+
+print("\nPredicted Uber Fare:", predicted_fare[0])
+# THEORY
+
+# Regression is a supervised machine learning technique used to predict continuous numerical values.
+# In this practical, Uber fare amounts are predicted using passenger count, pickup location,
+# drop-off location and travelling distance.
+
+# Linear Regression predicts fare amounts by finding a linear relationship between input features and target values.
+
+# Ridge Regression uses L2 regularization to reduce overfitting by controlling large coefficients.
+
+# Lasso Regression uses L1 regularization to reduce coefficients and perform feature selection.
+
+# Data preprocessing is performed to remove missing values, invalid data and outliers.
+
+# The Haversine formula is used to calculate the distance between pickup and drop-off locations.
+
+# The dataset is divided into 80% training data and 20% testing data.
+
+# The models are evaluated using R2 Score, RMSE and MAE.
+
+# Finally, all three regression models are compared and the Linear Regression model
+# is used to predict the fare amount of a new Uber ride.
+
+# 1. IMPORT NECESSARY LIBRARIES
+
+# Imports the Pandas library for reading and handling datasets.
+# Imports the NumPy library for mathematical and numerical calculations.
+# Imports Matplotlib for creating graphs and visualizations.
+# Imports Seaborn for creating statistical graphs such as box plots and heatmaps.
+# Imports train_test_split to divide the dataset into training and testing data.
+# Imports LinearRegression to create a basic linear regression model.
+# Imports Ridge to perform Ridge regularization.
+# Imports Lasso to perform Lasso regularization.
+# Imports StandardScaler to standardize the input features.
+# Imports make_pipeline to combine preprocessing and machine learning steps.
+# Imports r2_score to calculate the R-squared evaluation score.
+# Imports mean_squared_error to calculate the mean squared error.
+# Imports mean_absolute_error to calculate the mean absolute error.
+
+
+# 2. LOAD DATASET
+
+# Reads the Uber dataset from the CSV file named uberr.csv.
+# Displays the first five rows of the dataset to understand its structure.
+# Displays the number of rows and columns present in the dataset.
+# Checks the number of missing values in each column.
+
+
+# 3. PRE-PROCESSING
+
+# Checks whether an unnecessary column named Unnamed: 0 exists.
+# Removes the unnecessary column if it is present.
+# Converts the pickup_datetime column into datetime format.
+# Converts invalid date values into missing values using errors="coerce".
+# Removes all rows containing missing values from the dataset.
+# Keeps only rides having a fare amount greater than zero.
+# Keeps only rides having passenger counts between 1 and 6.
+# Removes rows having invalid pickup and drop-off latitude values.
+# Removes rows having invalid pickup and drop-off longitude values.
+# Displays the first five rows of the cleaned dataset.
+# Displays the dataset shape after preprocessing.
+
+
+# 4. CALCULATE DISTANCE USING HAVERSINE FORMULA
+
+# Converts pickup latitude values from degrees into radians.
+# Converts pickup longitude values from degrees into radians.
+# Converts drop-off latitude values from degrees into radians.
+# Converts drop-off longitude values from degrees into radians.
+# Calculates the difference between pickup and drop-off latitudes.
+# Calculates the difference between pickup and drop-off longitudes.
+# Calculates the intermediate value required by the Haversine formula.
+# Uses trigonometric functions to calculate the geographical distance.
+# Restricts the calculated values between 0 and 1 to avoid numerical errors.
+# Calculates the central angle between the pickup and drop-off locations.
+# Multiplies the central angle by the Earth's radius to calculate distance in kilometres.
+# Stores the calculated distance in a new column named distance.
+# Displays the first five calculated distance values.
+
+
+# 5. IDENTIFY OUTLIERS
+
+# Creates a figure with a specified width and height.
+# Creates a box plot to visualize the distribution of fare amounts.
+# Sets the title of the fare amount box plot before outlier removal.
+# Displays the fare amount box plot.
+# Creates another figure for visualizing ride distances.
+# Creates a box plot to identify unusual distance values.
+# Sets the title of the distance box plot before outlier removal.
+# Displays the distance box plot.
+
+
+# 6. REMOVE OUTLIERS USING IQR
+
+# Calculates the first quartile (Q1) of the fare amount.
+# Calculates the third quartile (Q3) of the fare amount.
+# Calculates the Interquartile Range by subtracting Q1 from Q3.
+# Calculates the lower boundary for identifying fare outliers.
+# Calculates the upper boundary for identifying fare outliers.
+# Displays the calculated first quartile.
+# Displays the calculated third quartile.
+# Displays the Interquartile Range.
+# Displays the lower limit for detecting outliers.
+# Displays the upper limit for detecting outliers.
+# Removes rides having fare amounts below the lower limit.
+# Removes rides having fare amounts above the upper limit.
+# Keeps only rides having a distance greater than zero.
+# Displays the dataset shape after removing outliers.
+
+
+# 7. BOX PLOT AFTER OUTLIER REMOVAL
+
+# Creates a figure for displaying the cleaned fare distribution.
+# Creates a box plot of fare amounts after removing outliers.
+# Sets the title of the box plot after outlier removal.
+# Displays the updated box plot to observe the cleaned data distribution.
+
+
+# 8. CHECK CORRELATION
+
+# Calculates the correlation between fare amount, passenger count,
+# pickup coordinates, drop-off coordinates and calculated distance.
+# Stores the correlation values in a variable named correlation.
+# Displays the correlation matrix to understand relationships between variables.
+
+
+# 9. CORRELATION HEATMAP
+
+# Creates a figure with a specified width and height.
+# Generates a heatmap using the calculated correlation matrix.
+# Displays the numerical correlation values inside the heatmap.
+# Uses the coolwarm colour scheme to represent positive and negative correlations.
+# Sets the title of the correlation heatmap.
+# Displays the heatmap to visualize relationships between features.
+
+
+# 10. SELECT FEATURES AND TARGET
+
+# Selects passenger count, pickup coordinates, drop-off coordinates
+# and calculated distance as independent input features.
+# Stores the selected input features in the variable X.
+# Selects fare_amount as the dependent target variable.
+# Stores the target variable in the variable y.
+# The model uses X to predict the fare amount stored in y.
+
+
+# 11. TRAIN TEST SPLIT
+
+# Divides the dataset into training and testing sets.
+# X represents the independent input features.
+# y represents the dependent target variable.
+# test_size=0.20 assigns 20% of the data for testing.
+# The remaining 80% of the data is used for training.
+# random_state=42 ensures reproducible splitting of the dataset.
+# Stores the training input data in X_train.
+# Stores the testing input data in X_test.
+# Stores the training target values in y_train.
+# Stores the testing target values in y_test.
+# Displays the shape of the training dataset.
+# Displays the shape of the testing dataset.
+
+
+# 12. LINEAR REGRESSION
+
+# Creates a Linear Regression model.
+# Trains the Linear Regression model using the training dataset.
+# Predicts Uber fare amounts using the testing input data.
+# Calculates the R-squared score to measure how well the model explains fare variations.
+# Calculates Root Mean Squared Error to measure prediction errors.
+# Calculates Mean Absolute Error to measure the average absolute prediction error.
+# Displays the Linear Regression model results.
+# Displays the R-squared score.
+# Displays the Root Mean Squared Error.
+# Displays the Mean Absolute Error.
+
+
+# 13. RIDGE REGRESSION
+
+# Creates a machine learning pipeline containing StandardScaler and Ridge Regression.
+# StandardScaler standardizes the input features before model training.
+# Ridge Regression applies L2 regularization to reduce the effect of large coefficients.
+# alpha=1.0 controls the strength of regularization.
+# Trains the Ridge Regression model using the training dataset.
+# Predicts fare amounts using the testing input data.
+# Calculates the R-squared score for Ridge Regression.
+# Calculates Root Mean Squared Error for Ridge Regression.
+# Calculates Mean Absolute Error for Ridge Regression.
+# Displays the Ridge Regression model results.
+# Displays the R-squared score.
+# Displays the Root Mean Squared Error.
+# Displays the Mean Absolute Error.
+
+
+# 14. LASSO REGRESSION
+
+# Creates a machine learning pipeline containing StandardScaler and Lasso Regression.
+# StandardScaler standardizes the input features before model training.
+# Lasso Regression applies L1 regularization to reduce unnecessary feature coefficients.
+# alpha=0.01 controls the strength of regularization.
+# max_iter=10000 specifies the maximum number of iterations for model convergence.
+# Trains the Lasso Regression model using the training dataset.
+# Predicts fare amounts using the testing input data.
+# Calculates the R-squared score for Lasso Regression.
+# Calculates Root Mean Squared Error for Lasso Regression.
+# Calculates Mean Absolute Error for Lasso Regression.
+# Displays the Lasso Regression model results.
+# Displays the R-squared score.
+# Displays the Root Mean Squared Error.
+# Displays the Mean Absolute Error.
+
+
+# 15. MODEL COMPARISON
+
+# Creates a Pandas DataFrame to compare the performance of all three models.
+# Stores the names of Linear, Ridge and Lasso Regression models.
+# Stores the R-squared scores of all three models.
+# Stores the Root Mean Squared Error values of all three models.
+# Stores the Mean Absolute Error values of all three models.
+# Displays the heading for the model comparison table.
+# Displays the comparison table containing all evaluation measures.
+
+
+# 16. MODEL COMPARISON GRAPH
+
+# Sets the Model column as the index of the comparison DataFrame.
+# Selects R-squared, RMSE and MAE values for graphical comparison.
+# Creates a bar graph to compare the performance of all three regression models.
+# Sets the graph size to 10 inches wide and 6 inches high.
+# Sets the title of the comparison graph.
+# Labels the vertical axis as Score.
+# Keeps the model names horizontally aligned.
+# Adds horizontal grid lines to make comparison easier.
+# Displays the model comparison graph.
+
+
+# 17. ACTUAL VS PREDICTED FARE
+
+# Creates a figure for visualizing actual and predicted fare amounts.
+# Creates a scatter plot comparing actual fare values with predicted fare values.
+# Uses y_test as the actual fare values.
+# Uses linear_pred as the fare values predicted by Linear Regression.
+# Sets alpha=0.5 to make overlapping points easier to observe.
+# Labels the horizontal axis as Actual Fare.
+# Labels the vertical axis as Predicted Fare.
+# Sets the title of the scatter plot.
+# Displays the graph to visualize the prediction performance of Linear Regression.
+
+
+# 18. PREDICT NEW UBER FARE
+
+# Defines the number of passengers for a new Uber ride.
+# Stores the pickup longitude of the new ride.
+# Stores the pickup latitude of the new ride.
+# Stores the drop-off longitude of the new ride.
+# Stores the drop-off latitude of the new ride.
+# Converts the pickup latitude into radians.
+# Converts the pickup longitude into radians.
+# Converts the drop-off latitude into radians.
+# Converts the drop-off longitude into radians.
+# Calculates the difference between the two latitudes.
+# Calculates the difference between the two longitudes.
+# Calculates the intermediate value required by the Haversine formula.
+# Uses trigonometric functions to calculate the geographical distance.
+# Restricts the calculated value between 0 and 1 to avoid numerical errors.
+# Calculates the central angle between the two locations.
+# Calculates the distance in kilometres using the Earth's radius.
+# Creates a DataFrame containing the new ride details.
+# Places passenger count, pickup coordinates, drop-off coordinates
+# and calculated distance in the same order as the training features.
+# Uses X.columns to ensure that the feature names match the training dataset.
+# Predicts the fare amount using the trained Linear Regression model.
+# Displays the predicted Uber fare for the new ride.
