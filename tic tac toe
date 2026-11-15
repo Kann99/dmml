@@ -1,4 +1,3 @@
-
 import numpy as np
 
 
@@ -259,19 +258,19 @@ def test_agent(agent):
 test_agent(agent1)
 
 
-#Reinforcement Learning	A machine learning technique in which an agent learns through rewards and penalties.
-#Q-Learning	A model-free reinforcement learning algorithm that learns the best actions for different states.
-#Agent	The AI player that learns to play the game.
-#Environment	The Tic-Tac-Toe game in which the agents interact.
-#State	The current arrangement of marks on the board.
-#Action	The move selected by the agent.
-#Reward	Feedback received by the agent after taking an action.
-#Q-Table	A table that stores the expected values of actions for different states.
-#Learning Rate	Controls how quickly the agent learns new information.
-#Discount Factor	Determines the importance of future rewards.
-#Exploration	Trying random moves to discover better actions.
-#Exploitation	Selecting the best-known action based on the Q-table.
-#Episode	One complete game of Tic-Tac-Toe.
+#Reinforcement Learning A machine learning technique in which an agent learns through rewards and penalties.
+#Q-Learning     A model-free reinforcement learning algorithm that learns the best actions for different states.
+#Agent  The AI player that learns to play the game.
+#Environment    The Tic-Tac-Toe game in which the agents interact.
+#State  The current arrangement of marks on the board.
+#Action The move selected by the agent.
+#Reward Feedback received by the agent after taking an action.
+#Q-Table        A table that stores the expected values of actions for different states.
+#Learning Rate  Controls how quickly the agent learns new information.
+#Discount Factor        Determines the importance of future rewards.
+#Exploration    Trying random moves to discover better actions.
+#Exploitation   Selecting the best-known action based on the Q-table.
+#Episode        One complete game of Tic-Tac-Toe.
 
 # Imports NumPy for mathematical operations.
 
@@ -437,5 +436,3 @@ test_agent(agent1)
 # Iterates through the three rows of the final board.
 # Displays each row of the final board.
 # Starts the game between the human and Agent 1.
-
-
