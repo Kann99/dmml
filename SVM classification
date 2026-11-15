@@ -1,0 +1,283 @@
+# 1. Import necessary libraries
+
+from sklearn.datasets import load_digits
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, classification_report
+import matplotlib.pyplot as plt
+
+
+# 2. Load handwritten digits dataset
+
+digits = load_digits()
+
+
+# 3. Input and output
+
+X = digits.data
+y = digits.target
+
+
+# 4. Display sample digit image
+
+plt.imshow(digits.images[0], cmap='gray')
+plt.title("Digit: " + str(y[0]))
+plt.axis('off')
+plt.show()
+
+
+# 5. Split dataset into training and testing data
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+
+# 6. Create SVM model
+
+model = SVC(kernel='rbf')
+
+
+# 7. Train the model
+
+model.fit(X_train, y_train)
+
+
+# 8. Prediction
+
+y_pred = model.predict(X_test)
+
+
+# 9. Calculate accuracy
+
+accuracy = accuracy_score(y_test, y_pred)
+
+print("Accuracy:", accuracy)
+
+
+# 10. Display classification report
+
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
+
+
+# 11. Display predictions for sample digits
+
+print("\nSample Predictions:")
+
+for i in range(5):
+
+    plt.imshow(X_test[i].reshape(8, 8), cmap='gray')
+
+    plt.title("Actual: {}  Predicted: {}".format(
+        y_test[i], y_pred[i]
+    ))
+
+    plt.axis('off')
+    plt.show()
+
+
+# 13. Identify and display misclassified digits
+
+misclassified = (y_test != y_pred)
+
+print("\nTotal Misclassified Digits:", sum(misclassified))
+
+print("\nMisclassified Digit Details:")
+
+for i in range(len(y_test)):
+
+    if misclassified[i]:
+
+        print("Actual:", y_test[i], "Predicted:", y_pred[i])
+
+        plt.imshow(X_test[i].reshape(8, 8), cmap='gray')
+
+        plt.title("Actual: {}  Predicted: {}".format(
+            y_test[i], y_pred[i]
+        ))
+
+        plt.axis('off')
+        plt.show()
+# THEORY
+
+# Support Vector Machine (SVM) is a supervised machine learning algorithm
+# used for classification and regression problems.
+
+# It works by finding the best decision boundary (hyperplane) to separate
+# different classes of data with maximum margin.
+
+# The nearest data points to the hyperplane are called support vectors.
+
+# In this practical, SVM is used to classify handwritten digit images
+# from 0 to 9 using the Scikit-learn digits dataset.
+
+# Each image is of size 8x8 pixels and contains 64 features.
+
+# The RBF kernel is used to classify non-linear data.
+
+# The model is trained using training data and evaluated using
+# accuracy, precision, recall and F1-score.
+
+# Sample predictions and misclassified images are displayed
+# to analyze the performance of the model.
+
+# 1. Import necessary libraries
+
+# Imports the handwritten digits dataset from Scikit-learn.
+#from sklearn.datasets import load_digits
+
+# Imports the function to split data into training and testing sets.
+#from sklearn.model_selection import train_test_split
+
+# Imports Support Vector Classifier to implement the SVM algorithm.
+#from sklearn.svm import SVC
+
+# Imports functions to calculate accuracy and display classification metrics.
+#from sklearn.metrics import accuracy_score, classification_report
+
+# Imports Matplotlib to display handwritten digit images.
+#import matplotlib.pyplot as plt
+
+
+# 2. Load handwritten digits dataset
+
+# Loads the built-in handwritten digits dataset containing digits from 0 to 9.
+#digits = load_digits()
+
+
+# 3. Input and output
+
+# Stores the image pixel values as input features.
+# Each 8x8 image is represented by 64 numerical values.
+#X = digits.data
+
+# Stores the actual digit labels from 0 to 9 as output.
+
+#y = digits.target
+
+
+# 4. Display sample digit image
+
+# Displays the first handwritten digit image in grayscale.
+#plt.imshow(digits.images[0], cmap='gray')
+
+# Displays the actual digit label as the title.
+#plt.title("Digit: " + str(y[0]))
+
+# Hides the axis values.
+#plt.axis('off')
+
+# Shows the image.
+#plt.show()
+
+
+# 5. Split dataset into training and testing data
+
+# Splits the dataset into 80% training data and 20% testing data.
+# X_train contains input data for training.
+# X_test contains input data for testing.
+# y_train contains actual labels for training.
+# y_test contains actual labels for testing.
+# random_state=42 ensures a reproducible split.
+# stratify=y maintains the proportion of each digit class.
+
+#X_train, X_test, y_train, y_test = train_test_split(
+#    X, y, test_size=0.2, random_state=42, stratify=y
+#)
+
+
+# 6. Create SVM model
+
+# Creates an SVM classification model using the RBF kernel.
+# The RBF kernel helps classify data with non-linear patterns.
+#model = SVC(kernel='rbf')
+
+
+# 7. Train the model
+
+# Trains the SVM model using the training data and their actual labels.
+#model.fit(X_train, y_train)
+
+
+# 8. Prediction
+
+# Predicts the handwritten digits using the trained SVM model.
+#y_pred = model.predict(X_test)
+
+
+# 9. Calculate accuracy
+
+# Compares actual and predicted labels to calculate model accuracy.
+#accuracy = accuracy_score(y_test, y_pred)
+
+# Prints the accuracy of the model.
+#print("Accuracy:", accuracy)
+
+
+# 10. Display classification report
+
+# Prints the heading of the classification report.
+#print("\nClassification Report:")
+
+# Displays precision, recall, F1-score and support for each digit class.
+#print(classification_report(y_test, y_pred))
+
+
+# 11. Display predictions for sample digits
+
+# Prints the heading for sample predictions.
+#print("\nSample Predictions:")
+
+# Repeats the following steps for the first five testing images.
+#for i in range(5):
+
+    # Reshapes the 64 pixel values into an 8x8 image and displays it.
+    #plt.imshow(X_test[i].reshape(8, 8), cmap='gray')
+
+    # Displays the actual digit and the predicted digit.
+   # plt.title("Actual: {}  Predicted: {}".format(
+    #    y_test[i], y_pred[i]
+   # ))
+
+    # Hides the axis values.
+    #plt.axis('off')
+
+    # Displays the image.
+    #plt.show()
+
+
+# 12. Identify and display misclassified digits
+
+# Compares actual and predicted labels to identify incorrect predictions.
+# True indicates an incorrect prediction, while False indicates a correct prediction.
+#misclassified = (y_test != y_pred)
+
+# Counts and displays the total number of misclassified digits.
+#print("\nTotal Misclassified Digits:", sum(misclassified))
+
+# Prints the heading for misclassified digit details.
+#print("\nMisclassified Digit Details:")
+
+# Checks each testing image for incorrect predictions.
+#for i in range(len(y_test)):
+
+    # Executes the following statements if the prediction is incorrect.
+    #if misclassified[i]:
+
+        # Prints the actual digit and the predicted digit.
+        #print("Actual:", y_test[i], "Predicted:", y_pred[i])
+
+        # Reshapes and displays the incorrectly classified digit image.
+        #plt.imshow(X_test[i].reshape(8, 8), cmap='gray')
+
+        # Displays the actual and predicted digit labels.
+        #plt.title("Actual: {}  Predicted: {}".format(
+         #   y_test[i], y_pred[i]
+        #))
+
+        # Hides the axis values.
+       # plt.axis('off')
+
+        # Displays the misclassified digit image.
+       # plt.show()
