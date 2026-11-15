@@ -1,5 +1,5 @@
 # 1. Import necessary libraries
-
+pip install scikit-learn matplotlib
 from sklearn.datasets import load_digits
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
