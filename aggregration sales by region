@@ -1,0 +1,386 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# 1. Load Dataset
+df = pd.read_csv("Superstore.csv", encoding="latin1")
+
+# 2. Display Dataset Information
+print("First 5 Records:")
+print(df.head())
+
+print("\nDataset Shape:")
+print(df.shape)
+
+print("\nColumn Names:")
+print(df.columns.tolist())
+
+print("\nDataset Information:")
+df.info()
+
+print("\nMissing Values:")
+print(df.isnull().sum())
+
+# 3. Clean Column Names
+df.columns = (
+    df.columns
+    .str.strip()
+    .str.lower()
+    .str.replace(" ", "_")
+)
+
+print("\nCleaned Column Names:")
+print(df.columns.tolist())
+
+# 4. Calculate Total Sales by Region
+region_sales = df.groupby("region")["sales"].sum()
+
+print("\nTotal Sales by Region:")
+print(region_sales)
+
+# 5. Bar Chart
+plt.figure(figsize=(8, 5))
+region_sales.plot(kind="bar")
+plt.title("Total Sales by Region")
+plt.xlabel("Region")
+plt.ylabel("Sales")
+plt.xticks(rotation=0)
+plt.show()
+
+# 6. Pie Chart
+plt.figure(figsize=(7, 7))
+region_sales.plot(kind="pie", autopct="%1.1f%%")
+plt.title("Sales Distribution by Region")
+plt.ylabel("")
+plt.show()
+
+# 7. Sort Regions by Sales
+top_regions = region_sales.sort_values(ascending=False)
+
+print("\nTop Performing Regions:")
+print(top_regions)
+
+# 8. Sales by Region and Category
+region_category_sales = df.groupby(
+    ["region", "category"]
+)["sales"].sum()
+
+print("\nSales by Region and Category:")
+print(region_category_sales)
+
+# 9. Create Pivot Table
+pivot_data = df.pivot_table(
+    values="sales",
+    index="region",
+    columns="category",
+    aggfunc="sum",
+    fill_value=0
+)
+
+print("\nRegion and Category Sales:")
+print(pivot_data)
+
+# 10. Display Grouped Bar Chart
+pivot_data.plot(kind="bar", figsize=(10, 6))
+
+plt.title("Sales by Region and Category")
+plt.xlabel("Region")
+plt.ylabel("Sales")
+plt.xticks(rotation=0)
+plt.legend(title="Category")
+plt.show()
+
+
+
+
+
+Import libraries
+import pandas as pdimport matplotlib.pyplot as plt
+
+
+
+- import pandas as pd – Imports Pandas for data analysis.
+- import matplotlib.pyplot as plt – Imports Matplotlib for data visualization.
+- pd and plt are aliases (short names).
+2. Load dataset
+df = pd.read_csv("Superstore.csv", encoding="latin1")
+
+
+
+- pd.read_csv() – Reads the CSV file.
+- "Superstore.csv" – Name of the dataset.
+- encoding="latin1" – Helps read special characters in the CSV file.
+- df – Stores the dataset in DataFrame format.
+3. Display dataset information
+print("First 5 Records:")print(df.head())
+
+
+
+- print() – Displays output.
+- df.head() – Displays the first five rows of the dataset.
+print("\nDataset Shape:")print(df.shape)
+
+
+
+- \n – Starts a new line.
+- df.shape – Displays the number of rows and columns.
+print("\nColumn Names:")print(df.columns.tolist())
+
+
+
+- df.columns – Displays all column names.
+- .tolist() – Converts column names into a list.
+print("\nDataset Information:")df.info()
+
+
+
+- df.info() – Displays column names, data types and non-null values.
+print("\nMissing Values:")print(df.isnull().sum())
+
+
+
+- df.isnull() – Checks missing values.
+- .sum() – Counts missing values in each column.
+Purpose: To understand the dataset before performing analysis.
+4. Clean column names
+df.columns = (    df.columns    .str.strip()    .str.lower()    .str.replace(" ", "_"))
+
+
+
+Line-by-line explanation:
+- df.columns – Selects all column names.
+- .str.strip() – Removes extra spaces from the beginning and end.
+- .str.lower() – Converts column names into lowercase.
+- .str.replace(" ", "_") – Replaces spaces with underscores.
+- df.columns = – Assigns the cleaned column names back to the DataFrame.
+Example:
+Original column	Cleaned column
+Region	region
+Sales	sales
+Order Date	order_date
+Customer Name	customer_name
+
+print("\nCleaned Column Names:")print(df.columns.tolist())
+
+
+
+- Displays the cleaned column names.
+
+Purpose: To make column names simple and easy to use in Python.
+5. Calculate total sales by region
+region_sales = df.groupby("region")["sales"].sum()print("\nTotal Sales by Region:")print(region_sales)
+
+
+
+Explanation:
+- df.groupby("region") – Groups records according to region.
+- ["sales"] – Selects the sales column.
+- .sum() – Calculates the total sales of each region.
+- region_sales – Stores the calculated result.
+- print() – Displays total sales by region.
+Example output:
+region
+Central     501239
+East        678781
+South       391722
+West        725458
+
+
+These are illustrative values; actual output depends on your dataset.
+
+Purpose: To find which region generates the highest total sales.
+6. Bar chart
+plt.figure(figsize=(8, 5))region_sales.plot(kind="bar")plt.title("Total Sales by Region")plt.xlabel("Region")plt.ylabel("Sales")plt.xticks(rotation=0)plt.show()
+
+
+
+Explanation:
+- plt.figure(figsize=(8, 5)) – Creates a graph with width 8 and height 5.
+- region_sales.plot(kind="bar") – Creates a bar chart using regional sales.
+- plt.title() – Adds the graph title.
+- plt.xlabel() – Labels the X-axis as Region.
+- plt.ylabel() – Labels the Y-axis as Sales.
+- plt.xticks(rotation=0) – Keeps region names horizontal.
+- plt.show() – Displays the graph.
+Purpose: To compare total sales across different regions.
+7. Pie chart
+plt.figure(figsize=(7, 7))region_sales.plot(kind="pie", autopct="%1.1f%%")plt.title("Sales Distribution by Region")plt.ylabel("")plt.show()
+
+
+
+Explanation:
+- plt.figure(figsize=(7, 7)) – Creates a square figure.
+- region_sales.plot(kind="pie") – Creates a pie chart.
+- autopct="%1.1f%%" – Displays percentage values up to one decimal place.
+- plt.title() – Adds the graph title.
+- plt.ylabel("") – Removes the default Y-axis label.
+- plt.show() – Displays the pie chart.
+Purpose: To show the percentage contribution of each region to total sales.
+8. Sort regions by sales
+top_regions = region_sales.sort_values(ascending=False)print("\nTop Performing Regions:")print(top_regions)
+
+
+
+Explanation:
+- region_sales – Contains total sales of each region.
+- .sort_values() – Sorts the sales values.
+- ascending=False – Sorts values in descending order (highest to lowest).
+- top_regions – Stores the sorted result.
+- print() – Displays the regions according to sales performance.
+Purpose: To identify the highest and lowest performing regions.
+9. Sales by region and category
+region_category_sales = df.groupby(    ["region", "category"])["sales"].sum()print("\nSales by Region and Category:")print(region_category_sales)
+
+
+
+Explanation:
+- df.groupby(["region", "category"]) – Groups data using two columns: region and category.
+- ["sales"] – Selects the sales column.
+- .sum() – Calculates total sales for each region-category combination.
+- region_category_sales – Stores the result.
+- print() – Displays the aggregated sales.
+Purpose: To understand how much each product category contributes to sales in every region.
+
+For example, it shows:
+- Central region – Furniture sales.
+- Central region – Office Supplies sales.
+- Central region – Technology sales.
+- The same breakdown for other regions.
+10. Create pivot table
+pivot_data = df.pivot_table(    values="sales",    index="region",    columns="category",    aggfunc="sum",    fill_value=0)
+
+
+
+Explanation:
+- df.pivot_table() – Creates a summarized table.
+- values="sales" – Uses the sales column for calculations.
+- index="region" – Displays regions as rows.
+- columns="category" – Displays categories as columns.
+- aggfunc="sum" – Calculates the total sales.
+- fill_value=0 – Replaces missing combinations with zero.
+- pivot_data – Stores the pivot table.
+print("\nRegion and Category Sales:")print(pivot_data)
+
+
+
+- Displays the summarized sales table.
+
+Example format:
+Region	Furniture	Office Supplies	Technology
+Central	10000	12000	15000
+East	14000	16000	18000
+South	9000	11000	13000
+West	17000	19000	22000
+
+Illustrative values only.
+
+Purpose: To summarize sales for each category and region in a tabular format.
+11. Display grouped bar chart
+pivot_data.plot(kind="bar", figsize=(10, 6))plt.title("Sales by Region and Category")plt.xlabel("Region")plt.ylabel("Sales")plt.xticks(rotation=0)plt.legend(title="Category")plt.show()
+
+
+
+Explanation:
+- pivot_data.plot(kind="bar") – Creates a grouped bar chart from the pivot table.
+- figsize=(10, 6) – Sets graph size.
+- plt.title() – Adds the graph title.
+- plt.xlabel() – Labels the X-axis.
+- plt.ylabel() – Labels the Y-axis.
+- plt.xticks(rotation=0) – Keeps region names horizontal.
+- plt.legend(title="Category") – Displays category names in the legend.
+- plt.show() – Displays the graph.
+Purpose: To compare Furniture, Office Supplies and Technology sales across different regions.
+
+Important functions for practical exam
+Function	Purpose
+pd.read_csv()	Reads CSV dataset
+df.head()	Displays first five records
+df.shape	Displays rows and columns
+df.info()	Displays dataset information
+df.isnull().sum()	Counts missing values
+df.groupby()	Groups data
+.sum()	Calculates total
+.sort_values()	Sorts values
+.pivot_table()	Creates summary table
+plot(kind="bar")	Creates bar chart
+plot(kind="pie")	Creates pie chart
+plt.legend()	Displays legend
+plt.show()	Displays graph
+
+Viva questions and answers
+Q1. What is Data Aggregation?
+
+Data Aggregation is the process of collecting and summarizing data to get meaningful information.
+
+Q2. What is Pandas?
+
+Pandas is a Python library used for data manipulation and analysis.
+
+Q3. What is GroupBy?
+
+GroupBy is used to divide data into groups based on one or more columns.
+
+Q4. What is the use of sum()?
+
+It calculates the total of numerical values.
+
+Q5. What is a pivot table?
+
+A pivot table is used to summarize and organize data in rows and columns.
+
+Q6. What is the use of sort_values()?
+
+It sorts data in ascending or descending order.
+
+Q7. What is the difference between a bar chart and a pie chart?
+- Bar chart compares values between categories.
+- Pie chart shows the percentage contribution of each category.
+Q8. What is autopct?
+
+It displays percentage values on a pie chart.
+
+Q9. What is ascending=False?
+
+It sorts values from highest to lowest.
+
+Q10. What is aggfunc="sum"?
+
+It tells the pivot table to calculate the sum of values.
+
+Q11. What is the use of fill_value=0?
+
+It replaces missing combinations in a pivot table with zero.
+
+Q12. What is the use of encoding="latin1"?
+
+It specifies the character encoding used to read the CSV file.
+
+Q13. What is the use of str.lower()?
+
+It converts column names into lowercase.
+
+Q14. What is the difference between groupby() and pivot_table()?
+- groupby() groups data and performs aggregation.
+- pivot_table() summarizes data in a row-and-column format.
+Q15. Which region has the highest sales?
+
+We can identify it from the output of top_regions. The first region has the highest sales.
+
+Quick revision: Understand the practical flow
+1. Load dataset – Read Superstore.csv.
+2. Explore dataset – Check rows, columns and missing values.
+3. Clean columns – Convert column names into lowercase.
+4. Aggregate sales – Calculate total sales by region.
+5. Visualize sales – Create bar chart and pie chart.
+6. Sort sales – Find top-performing regions.
+7. Category analysis – Calculate sales by region and category.
+8. Pivot table – Summarize sales in table format.
+9. Grouped bar chart – Compare categories across regions.
+
+Important for viva
+ Remember these differences:
+- groupby() = Group and calculate.
+- pivot_table() = Summarize in rows and columns.
+- sum() = Total.
+- sort_values() = Arrange values.
+- Bar chart = Comparison.
+- Pie chart = Percentage distribution.
