@@ -1,0 +1,181 @@
+import pandas as pd
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+
+# Read CSV file
+df = pd.read_csv("Wine dataset.csv")
+
+# Display column names
+print("Column Names:")
+print(df.keys())
+
+# Display unique classes
+print("\nUnique Classes:")
+print(df['class'].unique())
+
+# Check missing values
+print("\nMissing Values:")
+print(df.isnull().sum())
+
+# Select only Class 1 and Class 2
+df = df[df['class'].isin([1, 2])]
+
+# Separate input features and target
+X = df.drop('class', axis=1)
+y = df['class']
+
+# Standardize the data
+sc = StandardScaler()
+X = sc.fit_transform(X)
+
+# Apply PCA
+pca = PCA()
+X_pca = pca.fit_transform(X)
+
+# Calculate explained variance ratio
+explained_variance_ratio = pca.explained_variance_ratio_
+
+# Plot cumulative explained variance
+plt.plot(
+    range(1, len(explained_variance_ratio) + 1),
+    explained_variance_ratio.cumsum(),
+    marker='o',
+    linestyle='--'
+)
+
+plt.xlabel('Number of Principal Components')
+plt.ylabel('Cumulative Explained Variance')
+plt.title('Explained Variance Ratio')
+plt.show()
+
+# Select 12 principal components
+n_components = 12
+
+pca = PCA(n_components=n_components)
+X_pca = pca.fit_transform(X)
+
+# Select Class 1 and Class 2 indices
+red_indices = (y.to_numpy() == 1)
+white_indices = (y.to_numpy() == 2)
+
+# Plot Class 1
+plt.scatter(
+    X_pca[red_indices, 0],
+    X_pca[red_indices, 1],
+    c='red',
+    label='Class 1'
+)
+
+# Plot Class 2
+plt.scatter(
+    X_pca[white_indices, 0],
+    X_pca[white_indices, 1],
+    c='blue',
+    label='Class 2'
+)
+
+plt.xlabel('Principal Component 1')
+plt.ylabel('Principal Component 2')
+plt.legend()
+plt.title('PCA: Class 1 vs Class 2')
+plt.show()
+
+# Import Pandas for reading and handling the dataset.
+# Import PCA for performing Principal Component Analysis.
+# Import StandardScaler for standardizing the input features.
+# Import Matplotlib for creating graphs and visualizations.
+
+
+# Read the Wine dataset from the CSV file and store it in a DataFrame.
+
+
+# Display all column names present in the dataset.
+# This helps identify the available input features and target column.
+
+
+# Display all unique class values present in the class column.
+# This helps identify the different categories in the dataset.
+
+
+# Check the number of missing values in each column.
+# This helps identify incomplete data in the dataset.
+
+
+# Select only records belonging to Class 1 and Class 2.
+# The isin() function checks whether each class value belongs
+# to the specified list.
+# Records from other classes are excluded.
+
+
+# Separate the input features and target variable.
+# X contains all columns except the class column.
+# y contains the class column, which represents the target labels.
+
+
+# Create a StandardScaler object.
+# Standardize the input features so that they have a common scale.
+# fit_transform() calculates the scaling values and transforms the data.
+# This prevents features with larger values from dominating PCA.
+
+
+# Create a PCA object without specifying the number of components.
+# This allows PCA to calculate all possible principal components.
+# Transform the standardized data into principal components.
+# The transformed data is stored in X_pca.
+
+
+# Calculate the explained variance ratio of each principal component.
+# It indicates how much information or variance each component retains.
+
+
+# Plot the cumulative explained variance.
+# The x-axis represents the number of principal components.
+# The y-axis represents the cumulative explained variance.
+# cumsum() calculates the running total of explained variance.
+# marker='o' displays circular markers on the graph.
+# linestyle='--' displays a dashed line connecting the markers.
+
+
+# Label the x-axis with the number of principal components.
+# Label the y-axis with cumulative explained variance.
+# Add a title to the graph.
+# Display the cumulative explained variance graph.
+
+
+# Set the number of principal components to 12.
+# This selects the first 12 principal components for dimensionality reduction.
+
+
+# Create a new PCA object with 12 principal components.
+# Fit PCA on the standardized data and transform it into 12 components.
+# Store the reduced dataset in X_pca.
+
+
+# Identify the records belonging to Class 1.
+# The result is a Boolean array containing True for Class 1 records.
+
+
+# Identify the records belonging to Class 2.
+# The result is a Boolean array containing True for Class 2 records.
+
+
+# Create a scatter plot for Class 1.
+# Use the first principal component as the x-coordinate.
+# Use the second principal component as the y-coordinate.
+# Display Class 1 points in red.
+# Add the label Class 1 to the legend.
+
+
+# Create a scatter plot for Class 2.
+# Use the first principal component as the x-coordinate.
+# Use the second principal component as the y-coordinate.
+# Display Class 2 points in blue.
+# Add the label Class 2 to the legend.
+
+
+# Label the x-axis as Principal Component 1.
+# Label the y-axis as Principal Component 2.
+# Display the legend to distinguish the two classes.
+# Add a title to the scatter plot.
+# Display the PCA scatter plot showing Class 1 and Class 2.
