@@ -1,0 +1,441 @@
+
+import numpy as np
+
+
+# A. Setting up the environment
+
+class TicTacToeEnvironment:
+
+    def __init__(self):
+        self.state = [0] * 9
+        self.is_terminal = False
+
+    def reset(self):
+        self.state = [0] * 9
+        self.is_terminal = False
+
+    def get_available_moves(self):
+        return [i for i, mark in enumerate(self.state) if mark == 0]
+
+    def make_move(self, move, player_mark):
+        self.state[move] = player_mark
+
+    def check_win(self, player_mark):
+        winning_states = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ]
+
+        for state_indices in winning_states:
+            if all(self.state[i] == player_mark for i in state_indices):
+                self.is_terminal = True
+                return True
+
+        return False
+
+    def is_draw(self):
+        return 0 not in self.state
+
+
+# B. Building the Q-Learning Agent
+
+class QLearningAgent:
+
+    def __init__(self, learning_rate=0.9, discount_factor=0.9,
+                 exploration_rate=0.3):
+
+        self.learning_rate = learning_rate
+        self.discount_factor = discount_factor
+        self.exploration_rate = exploration_rate
+        self.q_table = np.zeros((3**9, 9))
+
+    def get_state_index(self, state):
+        state_index = 0
+
+        for i, mark in enumerate(state):
+            state_index += (3 ** i) * (mark + 1)
+
+        return state_index
+
+    def choose_action(self, state, available_moves):
+        state_index = self.get_state_index(state)
+
+        if np.random.random() < self.exploration_rate:
+            return np.random.choice(available_moves)
+
+        best_move_index = np.argmax(
+            self.q_table[state_index, available_moves]
+        )
+
+        return available_moves[best_move_index]
+
+    def update_q_table(self, state, action, next_state, reward,
+                       next_available_moves=None):
+
+        state_index = self.get_state_index(state)
+
+        if next_state is not None and len(next_available_moves) > 0:
+            next_state_index = self.get_state_index(next_state)
+            max_q_value = np.max(
+                self.q_table[next_state_index, next_available_moves]
+            )
+        else:
+            max_q_value = 0
+
+        self.q_table[state_index, action] = (
+            (1 - self.learning_rate) * self.q_table[state_index, action]
+            + self.learning_rate *
+            (reward + self.discount_factor * max_q_value)
+        )
+
+
+# C. Training the agents
+
+def evaluate_agents(agent1, agent2, num_episodes):
+
+    environment = TicTacToeEnvironment()
+
+    agent1_wins = 0
+    agent2_wins = 0
+    draws = 0
+
+    for _ in range(num_episodes):
+
+        environment.reset()
+        current_agent = agent1
+
+        previous_moves = {
+            agent1: None,
+            agent2: None
+        }
+
+        while not environment.is_terminal:
+
+            available_moves = environment.get_available_moves()
+            current_state = environment.state.copy()
+
+            if previous_moves[current_agent] is not None:
+                prev_state, prev_action = previous_moves[current_agent]
+
+                current_agent.update_q_table(
+                    prev_state, prev_action, current_state,
+                    0, available_moves
+                )
+
+                previous_moves[current_agent] = None
+
+            action = current_agent.choose_action(
+                current_state, available_moves
+            )
+
+            if current_agent == agent1:
+                player_mark = 1
+                opponent = agent2
+            else:
+                player_mark = -1
+                opponent = agent1
+
+            environment.make_move(action, player_mark)
+
+            if environment.check_win(player_mark):
+
+                current_agent.update_q_table(
+                    current_state, action, None, 10
+                )
+
+                if previous_moves[opponent] is not None:
+                    prev_state, prev_action = previous_moves[opponent]
+
+                    opponent.update_q_table(
+                        prev_state, prev_action, None, -10
+                    )
+
+                if current_agent == agent1:
+                    agent1_wins += 1
+                else:
+                    agent2_wins += 1
+
+                break
+
+            elif environment.is_draw():
+
+                current_agent.update_q_table(
+                    current_state, action, None, 0
+                )
+
+                if previous_moves[opponent] is not None:
+                    prev_state, prev_action = previous_moves[opponent]
+
+                    opponent.update_q_table(
+                        prev_state, prev_action, None, 0
+                    )
+
+                draws += 1
+                break
+
+            previous_moves[current_agent] = (current_state, action)
+            current_agent = opponent
+
+    return agent1_wins, agent2_wins, draws
+
+
+# D. Training the model
+
+agent1 = QLearningAgent()
+agent2 = QLearningAgent()
+
+num_episodes = int(input("Enter number of training games: "))
+
+agent1_wins, agent2_wins, draws = evaluate_agents(
+    agent1, agent2, num_episodes
+)
+
+print("\nTraining Results")
+print("Agent 1 wins:", agent1_wins)
+print("Agent 2 wins:", agent2_wins)
+print("Draws:", draws)
+
+
+# E. Testing the trained model against a human
+
+def test_agent(agent):
+
+    environment = TicTacToeEnvironment()
+    environment.reset()
+
+    agent.exploration_rate = 0
+
+    print("\nYou are X (1), Agent is O (-1)")
+    print("Enter positions from 1 to 9")
+
+    while not environment.is_terminal:
+
+        print("\nCurrent Board:")
+        for i in range(0, 9, 3):
+            print(environment.state[i:i+3])
+
+        available_moves = environment.get_available_moves()
+
+        # Human move
+        move = int(input("Enter your move (1-9): ")) - 1
+
+        if move not in available_moves:
+            print("Invalid move! Try again.")
+            continue
+
+        environment.make_move(move, 1)
+
+        if environment.check_win(1):
+            print("You win!")
+            break
+
+        if environment.is_draw():
+            print("Match Draw!")
+            break
+
+        # Agent move
+        available_moves = environment.get_available_moves()
+        state = environment.state.copy()
+
+        action = agent.choose_action(state, available_moves)
+        environment.make_move(action, -1)
+
+        print("Agent selected position:", action + 1)
+
+        if environment.check_win(-1):
+            print("Agent wins!")
+            break
+
+        if environment.is_draw():
+            print("Match Draw!")
+            break
+
+    print("\nFinal Board:")
+    for i in range(0, 9, 3):
+        print(environment.state[i:i+3])
+
+
+test_agent(agent1)
+
+
+#Reinforcement Learning	A machine learning technique in which an agent learns through rewards and penalties.
+#Q-Learning	A model-free reinforcement learning algorithm that learns the best actions for different states.
+#Agent	The AI player that learns to play the game.
+#Environment	The Tic-Tac-Toe game in which the agents interact.
+#State	The current arrangement of marks on the board.
+#Action	The move selected by the agent.
+#Reward	Feedback received by the agent after taking an action.
+#Q-Table	A table that stores the expected values of actions for different states.
+#Learning Rate	Controls how quickly the agent learns new information.
+#Discount Factor	Determines the importance of future rewards.
+#Exploration	Trying random moves to discover better actions.
+#Exploitation	Selecting the best-known action based on the Q-table.
+#Episode	One complete game of Tic-Tac-Toe.
+
+# Imports NumPy for mathematical operations.
+
+# A. Setting up the environment
+
+# Defines the Tic-Tac-Toe environment.
+# Initializes the game.
+# Creates an empty board with 9 positions.
+# Indicates that the game is not over.
+# Resets the game.
+# Makes all board positions empty.
+# Sets the game status to not over.
+# Finds all empty positions on the board.
+# Returns the positions containing 0.
+# Places a player's mark on the board.
+# Updates the selected position with the player's mark.
+# Checks whether a player has won.
+# Stores all possible winning combinations.
+# Represents the three horizontal winning combinations.
+# Represents the three vertical winning combinations.
+# Represents the two diagonal winning combinations.
+# Checks each winning combination.
+# Checks whether all positions in a combination contain the player's mark.
+# Marks the game as over when a player wins.
+# Returns True if the player wins.
+# Returns False if the player has not won.
+# Checks whether the game is a draw.
+# Returns True if all board positions are occupied.
+
+# B. Building the Q-Learning Agent
+
+# Defines the Q-Learning agent.
+# Initializes the agent with learning parameters.
+# Sets the learning rate to control how much new information is learned.
+# Sets the discount factor to determine the importance of future rewards.
+# Sets the exploration rate to control random action selection.
+# Creates a Q-table with 3^9 possible states and 9 actions.
+# Converts the board state into a unique index.
+# Initializes the state index to zero.
+# Reads each board position and its mark.
+# Converts the board state into a base-3 index.
+# Returns the calculated state index.
+# Selects an action for the current state.
+# Gets the index of the current state.
+# Uses the exploration rate to decide whether to explore.
+# Selects a random available move.
+# Finds the index of the available move with the highest Q-value.
+# Gets the Q-values of all available moves.
+# Returns the available move with the highest Q-value.
+# Updates the Q-table based on rewards and future Q-values.
+# Gets the index of the current state.
+# Checks whether a next state exists and has available moves.
+# Gets the index of the next state.
+# Finds the maximum future Q-value.
+# Gets the Q-values of the next available moves.
+# Sets the future Q-value to zero for terminal states.
+# Updates the Q-value of the selected action.
+# Calculates the contribution of the old Q-value.
+# Applies the learning rate to the new information.
+# Calculates the new Q-value using the reward and discounted future value.
+
+# C. Training the agents
+
+# Defines a function to train both agents through self-play.
+# Creates the Tic-Tac-Toe game environment.
+# Initializes Agent 1's win count to zero.
+# Initializes Agent 2's win count to zero.
+# Initializes the draw count to zero.
+# Repeats the training process for the specified number of games.
+# Resets the game board for each new game.
+# Starts each game with Agent 1.
+# Stores the previous moves of both agents.
+# Initializes Agent 1's previous move as None.
+# Initializes Agent 2's previous move as None.
+# Continues playing until the game ends.
+# Gets all available moves on the board.
+# Stores a copy of the current board state.
+# Checks whether the current agent has a previous move.
+# Retrieves the previous state and action of the current agent.
+# Updates the Q-value of the previous action.
+# Uses zero reward for a normal transition.
+# Clears the stored previous move.
+# Selects an action using the Q-Learning agent.
+# Passes the current state and available moves.
+# Checks whether Agent 1 is playing.
+# Assigns mark 1 to Agent 1.
+# Sets Agent 2 as the opponent.
+# Assigns mark -1 to Agent 2.
+# Sets Agent 1 as the opponent.
+# Executes the selected move on the board.
+# Checks whether the current agent has won.
+# Updates the Q-value of the winning action.
+# Gives a reward of +10 for winning.
+# Checks whether the opponent has a previous move.
+# Retrieves the opponent's previous state and action.
+# Updates the opponent's previous action.
+# Gives a penalty of -10 for losing.
+# Checks whether Agent 1 has won.
+# Increases Agent 1's win count.
+# Increases Agent 2's win count.
+# Ends the current game after a win.
+# Checks whether the game is a draw.
+# Updates the Q-value of the current agent's action.
+# Gives a reward of 0 for a draw.
+# Checks whether the opponent has a previous move.
+# Retrieves the opponent's previous state and action.
+# Updates the opponent's previous action.
+# Gives a reward of 0 for a draw.
+# Increases the draw count.
+# Ends the current game after a draw.
+# Stores the current state and action for future learning.
+# Switches the turn to the opponent.
+# Returns the win counts of both agents and the total draws.
+
+# D. Training the model
+
+# Creates the first Q-Learning agent.
+# Creates the second Q-Learning agent.
+# Takes the number of training games as input from the user.
+# Trains both agents and stores their results.
+# Passes both agents and the number of training games.
+# Displays the training results heading.
+# Displays the number of wins by Agent 1.
+# Displays the number of wins by Agent 2.
+# Displays the total number of draws.
+
+# E. Testing the trained model against a human
+
+# Defines a function to test the trained agent against a human.
+# Creates a new Tic-Tac-Toe environment.
+# Resets the game board.
+# Sets the exploration rate to zero to disable random moves during testing.
+# Displays the marks assigned to the human and the agent.
+# Displays the valid board positions from 1 to 9.
+# Continues the game until it ends.
+# Displays the current board heading.
+# Iterates through the three rows of the board.
+# Displays each row of the board.
+# Gets all available positions.
+# Takes the human's move and converts it into a zero-based index.
+# Checks whether the selected position is available.
+# Displays an invalid move message.
+# Asks the human to enter another move.
+# Places the human's mark on the board.
+# Checks whether the human has won.
+# Displays the human's winning message.
+# Ends the game.
+# Checks whether the game is a draw.
+# Displays the draw message.
+# Ends the game.
+# Gets the remaining available positions.
+# Stores a copy of the current board state.
+# Selects the agent's move using the learned Q-values.
+# Places the agent's mark on the board.
+# Displays the position selected by the agent.
+# Checks whether the agent has won.
+# Displays the agent's winning message.
+# Ends the game.
+# Checks whether the game is a draw.
+# Displays the draw message.
+# Ends the game.
+# Displays the final board heading.
+# Iterates through the three rows of the final board.
+# Displays each row of the final board.
+# Starts the game between the human and Agent 1.
+
+
