@@ -1,0 +1,167 @@
+import pandas as pd 
+from sklearn.datasets import load_digits #end 
+digits = load_digits() 
+dir(digits)
+import matplotlib.pyplot as plt  
+plt.gray()#end 
+for i in range(4): 
+ plt.matshow(digits.images[i]) #end
+df = pd.DataFrame(digits.data) 
+df.head() 
+df['target'] = digits.target 
+X = df.drop('target',axis='columns')  
+y = df.target
+from sklearn.model_selection import train_test_split 
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2) 
+from sklearn.ensemble import RandomForestClassifier 
+model = RandomForestClassifier(n_estimators=20)  
+model.fit(X_train,y_train) 
+y_predicted = model.predict(X_test) 
+from sklearn.metrics import confusion_matrix 
+cm = confusion_matrix(y_test, y_predicted) 
+import matplotlib.pyplot as plt 
+import seaborn as sn 
+plt.figure(figsize=(10,7)) 
+sn.heatmap(cm, annot=True) 
+plt.xlabel('Predicted')
+
+# 1. IMPORT NECESSARY LIBRARIES
+
+import pandas as pd
+# Imports Pandas to create and manage data in tabular form.
+
+from sklearn.datasets import load_digits
+# Imports the handwritten digits dataset from Scikit-learn.
+
+
+# 2. LOAD THE DATASET
+
+digits = load_digits()
+# Loads the handwritten digits dataset.
+# It contains images of handwritten digits from 0 to 9.
+
+dir(digits)
+# Displays the available attributes and functions of the dataset.
+
+
+# 3. DISPLAY DIGIT IMAGES
+
+import matplotlib.pyplot as plt
+# Imports Matplotlib for displaying digit images and creating graphs.
+
+plt.gray()
+# Sets the image display color to grayscale.
+
+for i in range(4):
+    # Repeats the loop four times to display the first four images.
+
+    plt.matshow(digits.images[i])
+    # Displays each handwritten digit image in grayscale.
+
+
+# 4. CONVERT DATA INTO DATAFRAME
+
+df = pd.DataFrame(digits.data)
+# Converts the digit pixel values into a Pandas DataFrame.
+# Each row represents an image and each column represents a pixel.
+
+df.head()
+# Displays the first five rows of the dataset.
+
+df['target'] = digits.target
+# Adds the actual digit labels as a new column named target.
+
+
+# 5. SEPARATE INPUT AND OUTPUT
+
+X = df.drop('target', axis='columns')
+# Stores pixel values as input features.
+# Removes the target column from the input data.
+
+y = df.target
+# Stores the actual digit labels as the output variable.
+
+
+# 6. SPLIT THE DATASET
+
+from sklearn.model_selection import train_test_split
+# Imports the function used to divide data into training and testing sets.
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2
+)
+# Splits the dataset into training and testing data.
+# 80% of the data is used for training.
+# 20% of the data is used for testing.
+
+
+# 7. CREATE RANDOM FOREST CLASSIFIER
+
+from sklearn.ensemble import RandomForestClassifier
+# Imports the Random Forest Classification algorithm.
+
+model = RandomForestClassifier(n_estimators=20)
+# Creates a Random Forest model containing 20 decision trees.
+
+
+# 8. TRAIN THE MODEL
+
+model.fit(X_train, y_train)
+# Trains the Random Forest model using the training data.
+# The model learns to recognize handwritten digits from pixel values.
+
+
+# 9. MAKE PREDICTIONS
+
+y_predicted = model.predict(X_test)
+# Predicts the digit labels for the testing data.
+
+
+# 10. CREATE CONFUSION MATRIX
+
+from sklearn.metrics import confusion_matrix
+# Imports the confusion_matrix function to evaluate classification results.
+
+cm = confusion_matrix(y_test, y_predicted)
+# Compares actual digit labels with predicted digit labels.
+# Stores the classification results in a confusion matrix.
+
+
+# 11. VISUALIZE CONFUSION MATRIX
+
+import matplotlib.pyplot as plt
+# Imports Matplotlib for graphical visualization.
+
+import seaborn as sn
+# Imports Seaborn for creating statistical graphs and heatmaps.
+
+plt.figure(figsize=(10,7))
+# Creates a figure with width 10 inches and height 7 inches.
+
+sn.heatmap(cm, annot=True)
+# Displays the confusion matrix as a heatmap.
+# annot=True displays the numerical values inside each cell.
+
+plt.xlabel('Predicted')
+# Labels the X-axis as Predicted.
+# THEORY:
+# Random Forest is a supervised machine learning algorithm used for
+# classification and regression problems.
+#
+# It is an ensemble learning technique that combines multiple
+# decision trees to improve prediction accuracy.
+#
+# Each decision tree is trained using different samples and features
+# from the dataset.
+#
+# In classification, the final prediction is determined by majority
+# voting among all the decision trees.
+#
+# Random Forest reduces overfitting and improves model performance
+# compared to a single decision tree.
+#
+# In this practical, the Random Forest algorithm is used to classify
+# handwritten digit images from 0 to 9 using their pixel values.
+#
+# A confusion matrix is used to compare actual and predicted values
+# and evaluate the classification performance.
