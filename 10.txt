@@ -1,0 +1,397 @@
+
+import pandas as pd
+import numpy as np
+
+# 1. Load Dataset
+df = pd.read_csv("house_data.csv")
+
+print("Original Data:")
+print(df.head())
+
+# 2. Clean Column Names
+df.columns = (
+    df.columns
+    .str.strip()
+    .str.lower()
+    .str.replace(" ", "_")
+    .str.replace(r"[^a-zA-Z0-9_]", "", regex=True)
+)
+
+print("\nColumn Names:")
+print(df.columns.tolist())
+
+# 3. Check Missing Values
+print("\nMissing Values:")
+print(df.isnull().sum())
+
+# 4. Handle Missing Values
+numeric_cols = df.select_dtypes(include=np.number).columns
+
+for col in numeric_cols:
+    df[col] = df[col].fillna(df[col].median())
+
+categorical_cols = df.select_dtypes(include="object").columns
+
+for col in categorical_cols:
+    df[col] = df[col].fillna(df[col].mode()[0])
+
+print("\nMissing Values After Cleaning:")
+print(df.isnull().sum())
+
+# 5. Filter Data
+filtered_data = df[df["price"] > 500000]
+
+print("\nHouses with Price Greater Than 500000:")
+print(filtered_data.head())
+
+# 6. Calculate Average Price
+print("\nAverage House Price:")
+print(df["price"].mean())
+
+# 7. Group Data by Bedrooms
+print("\nAverage Price by Bedrooms:")
+print(df.groupby("bedrooms")["price"].mean())
+
+# 8. Detect and Remove Outliers using IQR
+Q1 = df["price"].quantile(0.25)
+Q3 = df["price"].quantile(0.75)
+
+IQR = Q3 - Q1
+
+lower_limit = Q1 - 1.5 * IQR
+upper_limit = Q3 + 1.5 * IQR
+
+print("\nLower Limit:", lower_limit)
+print("Upper Limit:", upper_limit)
+
+df_clean = df[
+    (df["price"] >= lower_limit) &
+    (df["price"] <= upper_limit)
+]
+
+print("\nRecords Before Removing Outliers:", len(df))
+print("Records After Removing Outliers:", len(df_clean))
+
+# 9. Encode Categorical Data
+categorical_cols = df_clean.select_dtypes(
+    include="object"
+).columns
+
+df_clean = pd.get_dummies(
+    df_clean,
+    columns=categorical_cols,
+    drop_first=True
+)
+
+print("\nEncoded Data:")
+print(df_clean.head())
+
+# 10. Save Cleaned Dataset
+df_clean.to_csv("RealEstate_Prices_Final.csv", index=False)
+
+print("\nData Wrangling Completed Successfully!")
+
+
+
+
+
+Import Libraries
+import pandas as pdimport numpy as np
+
+
+
+- import pandas as pd – Imports Pandas for data manipulation and analysis.
+- import numpy as np – Imports NumPy for numerical calculations.
+2. Load Dataset
+df = pd.read_csv("house_data.csv")print("Original Data:")print(df.head())
+
+
+
+- pd.read_csv() – Loads the CSV file into a DataFrame.
+- df – Stores the dataset.
+- print() – Displays the output.
+- df.head() – Displays the first five rows of the dataset.
+3. Clean Column Names
+df.columns = (    df.columns    .str.strip()    .str.lower()    .str.replace(" ", "_")    .str.replace(r"[^a-zA-Z0-9_]", "", regex=True))
+
+
+
+- df.columns – Accesses all column names.
+- .str.strip() – Removes extra spaces from the beginning and end.
+- .str.lower() – Converts all column names into lowercase letters.
+- .str.replace(" ", "_") – Replaces spaces with underscores.
+- .str.replace(r"[^a-zA-Z0-9_]", "", regex=True) – Removes special characters from column names.
+- regex=True – Treats the pattern as a regular expression.
+Example:
+
+Before: House Price ($)
+
+After: house_price
+4. Display Column Names
+print("\nColumn Names:")print(df.columns.tolist())
+
+
+
+- print() – Displays the column names.
+- .columns – Accesses column names.
+- .tolist() – Converts column names into a Python list.
+- \n – Moves output to a new line.
+5. Check Missing Values
+print("\nMissing Values:")print(df.isnull().sum())
+
+
+
+- .isnull() – Checks missing values.
+- .sum() – Counts missing values in each column.
+- print() – Displays the missing value count.
+6. Handle Missing Values
+numeric_cols = df.select_dtypes(include=np.number).columnsfor col in numeric_cols:    df[col] = df[col].fillna(df[col].median())
+
+
+
+- numeric_cols – Stores numerical column names.
+- .select_dtypes(include=np.number) – Selects numerical columns.
+- .columns – Returns column names.
+- for col in numeric_cols – Loops through each numerical column.
+- .median() – Calculates the middle value.
+- .fillna() – Replaces missing values with the median.
+Purpose: To fill missing numerical values.
+categorical_cols = df.select_dtypes(include="object").columnsfor col in categorical_cols:    df[col] = df[col].fillna(df[col].mode()[0])
+
+
+
+- categorical_cols – Stores categorical column names.
+- include="object" – Selects text columns.
+- for col in categorical_cols – Loops through categorical columns.
+- .mode() – Finds the most frequently occurring value.
+- [0] – Selects the first mode.
+- .fillna() – Replaces missing values with the most frequent value.
+Purpose: To fill missing categorical values.
+7. Display Missing Values After Cleaning
+print("\nMissing Values After Cleaning:")print(df.isnull().sum())
+
+
+
+- .isnull() – Checks whether missing values remain.
+- .sum() – Counts missing values.
+- print() – Displays the result.
+8. Filter Data
+filtered_data = df[df["price"] > 500000]print("\nHouses with Price Greater Than 500000:")print(filtered_data.head())
+
+
+
+- filtered_data – Stores the filtered dataset.
+- df["price"] – Selects the price column.
+- > 500000 – Checks houses with prices greater than 500000.
+- df[...] – Selects only rows satisfying the condition.
+- .head() – Displays the first five filtered records.
+Purpose: To select houses having a price greater than 500000.
+9. Calculate Average Price
+print("\nAverage House Price:")print(df["price"].mean())
+
+
+
+- df["price"] – Selects the price column.
+- .mean() – Calculates the average house price.
+- print() – Displays the result.
+10. Group Data by Bedrooms
+print("\nAverage Price by Bedrooms:")print(df.groupby("bedrooms")["price"].mean())
+
+
+
+- .groupby("bedrooms") – Groups houses according to the number of bedrooms.
+- ["price"] – Selects the price column.
+- .mean() – Calculates the average price for each bedroom group.
+- print() – Displays the result.
+Example:
+Bedrooms	Average Price
+2	400000
+3	550000
+4	750000
+
+11. Detect and Remove Outliers Using IQR
+Q1 = df["price"].quantile(0.25)Q3 = df["price"].quantile(0.75)IQR = Q3 - Q1
+
+
+
+- Q1 – Stores the first quartile (25%).
+- Q3 – Stores the third quartile (75%).
+- .quantile(0.25) – Calculates the first quartile.
+- .quantile(0.75) – Calculates the third quartile.
+- IQR – Calculates the Interquartile Range.
+- Q3 - Q1 – Finds the difference between Q3 and Q1.
+Formula:
+\[
+IQR=Q3-Q1
+\]
+
+lower_limit = Q1 - 1.5 * IQRupper_limit = Q3 + 1.5 * IQRprint("\nLower Limit:", lower_limit)print("Upper Limit:", upper_limit)
+
+
+
+- lower_limit – Calculates the lower boundary for normal values.
+- upper_limit – Calculates the upper boundary for normal values.
+- 1.5 * IQR – Uses the standard IQR multiplier.
+- print() – Displays both limits.
+Formula:
+\[
+Lower=Q1-1.5\times IQR
+\]
+
+\[
+Upper=Q3+1.5\times IQR
+\]
+
+df_clean = df[    (df["price"] >= lower_limit) &    (df["price"] <= upper_limit)]
+
+
+
+- df_clean – Stores the dataset after removing outliers.
+- df["price"] >= lower_limit – Selects prices above or equal to the lower limit.
+- df["price"] <= upper_limit – Selects prices below or equal to the upper limit.
+- & – Combines both conditions using AND.
+- df[...] – Selects rows satisfying both conditions.
+Purpose: To remove unusually high and low house prices.
+12. Display Records Before and After Removing Outliers
+print("\nRecords Before Removing Outliers:", len(df))print("Records After Removing Outliers:", len(df_clean))
+
+
+
+- len(df) – Counts the original number of records.
+- len(df_clean) – Counts records after removing outliers.
+- print() – Displays both counts.
+13. Encode Categorical Data
+categorical_cols = df_clean.select_dtypes(    include="object").columns
+
+
+
+- categorical_cols – Stores categorical column names.
+- .select_dtypes(include="object") – Selects text columns.
+- .columns – Returns their column names.
+df_clean = pd.get_dummies(    df_clean,    columns=categorical_cols,    drop_first=True)
+
+
+
+- pd.get_dummies() – Converts categorical values into numerical columns.
+- df_clean – Specifies the dataset.
+- columns=categorical_cols – Selects the categorical columns to encode.
+- drop_first=True – Removes the first category column to avoid redundant dummy variables.
+Example:
+
+Before encoding:
+Location
+Pune
+Mumbai
+Pune
+
+After encoding:
+Location_Pune
+1
+0
+1
+
+14. Display Encoded Data
+print("\nEncoded Data:")print(df_clean.head())
+
+
+
+- print() – Displays the message.
+- df_clean.head() – Displays the first five rows of the encoded dataset.
+15. Save Cleaned Dataset
+df_clean.to_csv("RealEstate_Prices_Final.csv", index=False)print("\nData Wrangling Completed Successfully!")
+
+
+
+- .to_csv() – Saves the cleaned dataset into a CSV file.
+- "RealEstate_Prices_Final.csv" – Specifies the output filename.
+- index=False – Prevents row indexes from being saved as an extra column.
+- print() – Displays the successful completion message.
+Conclusion
+Successfully performed data wrangling on the house price dataset by cleaning column names, handling missing values, filtering records, calculating average prices, grouping data, detecting and removing outliers and encoding categorical data.
+Important Functions to Remember
+Function	Use
+read_csv()	Load CSV file
+head()	Display first 5 rows
+columns	Access column names
+str.strip()	Remove extra spaces
+str.lower()	Convert into lowercase
+select_dtypes()	Select specific data types
+isnull()	Check missing values
+median()	Calculate median
+mode()	Find most frequent value
+fillna()	Handle missing values
+mean()	Calculate average
+groupby()	Group data
+quantile()	Calculate quartiles
+len()	Count records
+get_dummies()	Encode categorical data
+to_csv()	Save dataset
+
+Important Viva Questions and Answers
+Q1. What is data wrangling?
+
+Data wrangling is the process of cleaning, transforming and organizing raw data into a useful format for analysis.
+
+Q2. What is the difference between data cleaning and data wrangling?
+
+Data cleaning focuses on correcting missing, duplicate and incorrect data. Data wrangling includes cleaning as well as transforming and organizing data.
+
+Q3. What is filtering?
+
+Filtering is the process of selecting records based on specific conditions.
+
+Q4. What is the use of groupby()?
+
+It groups data based on a particular column and performs calculations such as sum, mean and count.
+
+Q5. What is IQR?
+
+IQR stands for Interquartile Range. It is the difference between the third quartile and first quartile.
+
+Q6. What is an outlier?
+
+An outlier is a value that is significantly different from other values in a dataset.
+
+Q7. What is the use of fillna()?
+
+It is used to replace missing values.
+
+Q8. What is the use of get_dummies()?
+
+It converts categorical data into numerical columns using one-hot encoding.
+
+Q9. What is one-hot encoding?
+
+One-hot encoding converts categories into separate binary columns containing 0 and 1.
+
+Q10. What is the use of drop_first=True?
+
+It removes the first dummy column to avoid redundant information.
+
+Q11. What is the difference between mean and median?
+
+Mean is the average of all values, whereas median is the middle value of sorted data.
+
+Q12. Why do we remove outliers?
+
+We remove outliers to reduce the effect of extreme values on data analysis.
+
+Q13. What is the use of quantile()?
+
+It calculates a specified position or percentile in a dataset.
+
+Q14. What is the use of len()?
+
+It counts the number of records in a dataset.
+
+Q15. Why do we clean column names?
+
+To make column names consistent, simple and easy to access in Python.
+
+Practical exam tip
+Remember these five important concepts:
+1. Data Wrangling
+2. Missing Value Handling
+3. Filtering and Grouping
+4. IQR for Outlier Detection
+5. One-Hot Encoding
