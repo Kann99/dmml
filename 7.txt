@@ -1,0 +1,243 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# 1. Load datasets
+csv_data = pd.read_csv("retail_sales_dataset.csv")
+excel_data = pd.read_csv("sales_data (1).csv")  # CSV correction
+json_data = pd.read_json("sales_data.json")
+
+# 2. Display first 5 records
+print("CSV Data")
+print(csv_data.head())
+print("\nExcel Data")
+print(excel_data.head())
+print("\nJSON Data")
+print(json_data.head())
+
+# 3. Display dataset information
+print("\nCSV Information")
+csv_data.info()
+print("\nExcel Data Information")
+excel_data.info()
+print("\nJSON Data Information")
+json_data.info()
+
+# 4. Check missing values
+print("\nMissing Values - CSV")
+print(csv_data.isnull().sum())
+print("\nMissing Values - Excel")
+print(excel_data.isnull().sum())
+print("\nMissing Values - JSON")
+print(json_data.isnull().sum())
+
+# 5. Remove duplicate records
+csv_data.drop_duplicates(inplace=True)
+excel_data.drop_duplicates(inplace=True)
+json_data.drop_duplicates(inplace=True)
+
+# 6. Handle missing values
+csv_data.fillna(0, inplace=True)
+excel_data.fillna(0, inplace=True)
+json_data.fillna(0, inplace=True)
+
+# 7. Merge all datasets
+sales = pd.concat(
+    [csv_data, excel_data, json_data],
+    ignore_index=True
+)
+
+print("\nMerged Dataset")
+print(sales.head())
+
+# 8. Calculate total sales
+sales["Total"] = sales["Quantity"] * sales["Price"]
+
+# 9. Summary statistics
+print("\nSummary Statistics")
+print(sales.describe())
+
+# 10. Calculate total and average sales
+total_sales = sales["Total"].sum()
+print("\nTotal Sales =", total_sales)
+
+average_order = sales["Total"].mean()
+print("Average Order Value =", average_order)
+
+# 11. Sales by category
+category_sales = sales.groupby("Category")["Total"].sum()
+print("\nSales by Category")
+print(category_sales)
+
+# 12. Category distribution
+category_distribution = sales["Category"].value_counts()
+print("\nCategory Distribution")
+print(category_distribution)
+
+# 13. Bar chart
+plt.figure(figsize=(8, 5))
+category_sales.plot(kind="bar")
+plt.title("Sales by Category")
+plt.xlabel("Category")
+plt.ylabel("Total Sales")
+plt.show()
+
+# 14. Pie chart
+plt.figure(figsize=(6, 6))
+category_distribution.plot(kind="pie", autopct="%1.1f%%")
+plt.title("Category Distribution")
+plt.ylabel("")
+plt.show()
+
+# 15. Box plot
+plt.figure(figsize=(6, 4))
+sales.boxplot(column="Total")
+plt.title("Sales Box Plot")
+plt.ylabel("Total Sales")
+plt.show()
+
+# 1. Load datasets
+# Read the first CSV file and store its data in csv_data.
+# Read the second CSV file and store its data in excel_data.
+# Read the JSON file and store its data in json_data.
+# These datasets contain retail sales information.
+
+
+# 2. Display first 5 records
+# Display the first five records of the CSV dataset.
+# Display the first five records of the second CSV dataset.
+# Display the first five records of the JSON dataset.
+# This helps us view and understand the structure of each dataset.
+
+
+# 3. Display dataset information
+# Display information about the CSV dataset, including column names,
+# data types, number of records and non-null values.
+# Display the same information for the second CSV dataset.
+# Display the same information for the JSON dataset.
+# This helps us understand the structure and data types of the datasets.
+
+
+# 4. Check missing values
+# Check and count missing values in each column of the CSV dataset.
+# Check and count missing values in each column of the second CSV dataset.
+# Check and count missing values in each column of the JSON dataset.
+# This helps identify incomplete or missing data.
+
+
+# 5. Remove duplicate records
+# Remove duplicate rows from the CSV dataset.
+# Remove duplicate rows from the second CSV dataset.
+# Remove duplicate rows from the JSON dataset.
+# This prevents repeated records from affecting the analysis.
+
+
+# 6. Handle missing values
+# Replace missing values with zero in the CSV dataset.
+# Replace missing values with zero in the second CSV dataset.
+# Replace missing values with zero in the JSON dataset.
+# This helps handle missing data before merging the datasets.
+
+
+# 7. Merge all datasets
+# Combine all three datasets into a single dataset.
+# The ignore_index option creates a new continuous index.
+# Store the combined dataset in the sales variable.
+# Display the first five records of the merged dataset.
+# This integrates data from different file formats into one dataset.
+
+
+# 8. Calculate total sales
+# Calculate total sales for each record by multiplying Quantity by Price.
+# Store the calculated values in a new column named Total.
+
+
+# 9. Summary statistics
+# Generate descriptive statistics for the numerical columns.
+# These statistics include count, mean, standard deviation,
+# minimum, maximum and quartile values.
+
+
+# 10. Calculate total and average sales
+# Add all values in the Total column to calculate total sales.
+# Display the overall total sales amount.
+# Calculate the average sales amount by finding the mean of Total.
+# Display the average order value.
+
+
+# 11. Sales by category
+# Group the sales records according to their Category.
+# Calculate the sum of Total sales for each category.
+# Display the total sales generated by each category.
+
+
+# 12. Category distribution
+# Count the number of records belonging to each category.
+# Display the frequency of each category.
+# This helps understand how sales records are distributed among categories.
+
+
+# 13. Bar chart
+# Create a figure with a width of 8 inches and a height of 5 inches.
+# Plot the total sales of each category using a bar chart.
+# Add a title to the chart.
+# Label the x-axis as Category.
+# Label the y-axis as Total Sales.
+# Display the bar chart for comparing sales across categories.
+
+
+# 14. Pie chart
+# Create a square figure with a width and height of 6 inches.
+# Plot the category distribution using a pie chart.
+# Display percentage values on each section of the pie chart.
+# Add a title to the chart.
+# Remove the default y-axis label.
+# Display the pie chart to understand category distribution.
+
+
+# 15. Box plot
+# Create a figure with a width of 6 inches and a height of 4 inches.
+# Create a box plot using the Total sales column.
+# Add a title to the box plot.
+# Label the y-axis as Total Sales.
+# Display the box plot to understand the distribution of sales values
+# and identify possible outliers.
+
+# THEORY:
+# Data integration is the process of combining data from multiple sources
+# into a single unified dataset for analysis.
+#
+# In this practical, retail sales data is collected from different file
+# formats such as CSV and JSON files.
+#
+# Pandas is a Python library used for reading, manipulating, cleaning
+# and analyzing datasets.
+#
+# The read_csv() function is used to read CSV files, while the
+# read_json() function is used to read JSON files.
+#
+# The head() function displays the first five records, and the info()
+# function provides information about the dataset.
+#
+# Missing values are identified using isnull().sum(), and duplicate
+# records are removed using drop_duplicates().
+#
+# The fillna() function is used to replace missing values with zero.
+#
+# The concat() function combines multiple datasets into one dataset.
+#
+# Sales analysis is performed by calculating total sales using
+# Quantity multiplied by Price.
+#
+# Summary statistics are used to understand the distribution of data.
+#
+# Grouping and counting functions are used to analyze sales
+# according to different product categories.
+#
+# Matplotlib is used to create visualizations such as bar charts,
+# pie charts and box plots.
+#
+# These visualizations help compare sales, understand category
+# distribution and identify possible outliers.
+#
+# Thus, data integration and analysis help combine retail sales data
+# from multiple sources and generate useful business insights.
