@@ -1,7 +1,6 @@
 
 import numpy as np
 
-
 # A. Setting up the environment
 
 class TicTacToeEnvironment:
