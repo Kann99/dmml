@@ -1,0 +1,142 @@
+
+import pandas as pd
+from sklearn.datasets import load_digits
+
+# Load the digits dataset
+digits = load_digits()
+
+# Display dataset information
+dir(digits)
+
+# Import matplotlib
+import matplotlib.pyplot as plt
+
+# Display images in grayscale
+plt.gray()
+
+# Display first four digit images
+for i in range(4):
+    plt.matshow(digits.images[i])
+
+# Convert dataset into DataFrame
+df = pd.DataFrame(digits.data)
+
+# Display first five rows
+df.head()
+
+# Add target column
+df['target'] = digits.target
+
+# Separate input and output variables
+X = df.drop('target', axis='columns')
+y = df.target
+
+# Split dataset into training and testing data
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2
+)
+
+# Import Random Forest Classifier
+from sklearn.ensemble import RandomForestClassifier
+
+# Create Random Forest model
+model = RandomForestClassifier(n_estimators=20)
+
+# Train the model
+model.fit(X_train, y_train)
+
+# Check model accuracy
+model.score(X_test, y_test)
+
+# Predict test data
+y_predicted = model.predict(X_test)
+
+# Generate confusion matrix
+from sklearn.metrics import confusion_matrix
+
+cm = confusion_matrix(y_test, y_predicted)
+
+# Visualize confusion matrix
+import seaborn as sn
+
+plt.figure(figsize=(10, 7))
+sn.heatmap(cm, annot=True)
+
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.show()
+# Theory:
+# Random Forest is a supervised machine learning algorithm used for
+# classification and regression tasks.
+#
+# It is an ensemble learning technique that combines multiple
+# decision trees to improve prediction accuracy.
+#
+# Each decision tree is trained using a random sample of the dataset
+# and a random selection of features.
+#
+# For classification, the final output is decided by majority voting
+# among all the decision trees.
+#
+# Random Forest reduces overfitting and generally provides better
+# accuracy and stability than a single decision tree.
+#
+# In this practical, Random Forest is used to classify handwritten
+# digit images from 0 to 9 based on their pixel values.
+#
+# The model performance is evaluated using accuracy and a confusion matrix.
+# 1. Importing Libraries:
+# Imports the required libraries for data handling, numerical operations,
+# data visualization, and implementing the Random Forest algorithm.
+
+# 2. Loading the Dataset:
+# Loads the handwritten digits dataset using load_digits().
+# The dataset contains images of handwritten digits from 0 to 9.
+
+# 3. Displaying Dataset Information:
+# Displays information about the dataset, including its features,
+# target values, and available images.
+
+# 4. Visualizing Digit Images:
+# Displays the first four handwritten digit images in grayscale
+# to understand how the digits are represented.
+
+# 5. Converting Data into a DataFrame:
+# Converts the dataset into a Pandas DataFrame.
+# Each row represents an image, and each column represents a pixel value.
+
+# 6. Separating Input and Output:
+# Separates pixel values (input features) and digit labels (output).
+
+# 7. Splitting the Dataset:
+# Divides the dataset into training and testing sets.
+# Training data is used to train the model, while testing data
+# is used to evaluate its performance.
+
+# 8. Creating the Random Forest Model:
+# Creates a Random Forest Classifier using multiple decision trees
+# to classify handwritten digits.
+
+# 9. Training the Model:
+# Trains the Random Forest model using the training dataset.
+
+# 10. Checking Accuracy:
+# Calculates the accuracy of the model using the testing dataset.
+
+# 11. Making Predictions:
+# Predicts the handwritten digit labels for the testing data.
+
+# 12. Creating a Confusion Matrix:
+# Compares actual and predicted labels to identify correct
+# and incorrect classifications.
+
+# 13. Visualizing the Confusion Matrix:
+# Displays the confusion matrix using a heatmap to understand
+# the classification performance of the model.
+
+# Practical Objective:
+# To implement the Random Forest Classification algorithm on the
+# handwritten digits dataset and evaluate its performance using
+# accuracy and a confusion matrix.
