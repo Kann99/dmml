@@ -1,0 +1,96 @@
+
+# Import necessary libraries
+
+import pandas as pd
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+
+
+# Load the dataset
+
+df = pd.read_csv(r"C:\Users\Software Lab-12\Downloads\Wine.csv")
+
+
+# Display dataset information
+
+print(df.keys())
+
+print(df.Customer_Segment.unique())
+
+print(df.isnull().sum())
+
+
+# Separate input features and target variable
+
+X = df.drop('Customer_Segment', axis=1)
+y = df['Customer_Segment']
+
+
+# Standardize the input features
+
+sc = StandardScaler()
+X = sc.fit_transform(X)
+
+
+# Apply PCA
+
+pca = PCA()
+X_pca = pca.fit_transform(X)
+
+
+# Calculate explained variance ratio
+
+explained_variance_ratio = pca.explained_variance_ratio_
+
+
+# Plot cumulative explained variance
+
+plt.plot(
+    range(1, len(explained_variance_ratio) + 1),
+    explained_variance_ratio.cumsum(),
+    marker='o',
+    linestyle='--'
+)
+
+plt.xlabel('Number of Principal Components')
+plt.ylabel('Cumulative Explained Variance')
+plt.title('Explained Variance Ratio')
+plt.show()
+
+
+# Reduce dimensions using 12 principal components
+
+n_components = 12
+
+pca = PCA(n_components=n_components)
+X_pca = pca.fit_transform(X)
+
+
+# Identify red wine and white wine indices
+
+red_indices = y[y == 1].index
+white_indices = y[y == 2].index
+
+
+# Visualize red wine and white wine
+
+plt.scatter(
+    X_pca[red_indices, 0],
+    X_pca[red_indices, 1],
+    c='red',
+    label='Red Wine'
+)
+
+plt.scatter(
+    X_pca[white_indices, 0],
+    X_pca[white_indices, 1],
+    c='blue',
+    label='White Wine'
+)
+
+plt.xlabel('Principal Component 1')
+plt.ylabel('Principal Component 2')
+plt.legend()
+plt.title('PCA: Red Wine vs. White Wine')
+plt.show()
