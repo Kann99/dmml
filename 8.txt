@@ -1,0 +1,24 @@
+# THEORY:
+# A Web API (Application Programming Interface) allows two applications
+# to communicate and exchange data over the internet.
+#
+# OpenWeatherMap API provides weather information such as temperature,
+# humidity, atmospheric pressure, wind speed and rainfall.
+#
+# An API key is required to access weather data from OpenWeatherMap.
+# The API returns weather information in JSON (JavaScript Object Notation)
+# format.
+#
+# Python's Requests library is used to fetch weather data from the API.
+# Pandas is used to organize, clean and analyze the retrieved data.
+# Matplotlib and Seaborn are used to visualize weather patterns
+# through line graphs, bar graphs, scatter plots and heatmaps.
+#
+# Statistical analysis and daily data aggregation help identify
+# weather patterns and trends over time.
+#
+# Correlation analysis is used to understand relationships between
+# different weather attributes.
+#
+# Thus, Web APIs help retrieve real-time or forecast data and perform
+# data analysis and visualization using Python.
