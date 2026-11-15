@@ -1,0 +1,333 @@
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+import seaborn as sns
+
+data = pd.read_csv("iiiris.csv")
+
+data
+
+data.head()
+
+data.tail()
+
+len(data)
+
+data.shape
+
+data.columns
+
+for i, col in enumerate(data.columns):
+    print(f'Column number {1+i} is {col}')
+
+data.dtypes
+
+data.info()
+
+data.describe()
+
+data.isnull()
+
+data.isnull().sum()
+
+data.drop('Id', axis=1, inplace=True)
+
+data.head()
+
+data.isna().sum()
+
+data.head()
+
+data['Species'].value_counts()
+
+target_data = data.iloc[:, 4]
+
+target_data.head()
+
+clustering_data = data.iloc[:, [0, 1, 2, 3]]
+
+clustering_data.head()
+
+fig, ax = plt.subplots(figsize=(15, 7))
+
+sns.set(font_scale=1.5)
+
+ax = sns.scatterplot(
+    x=data['SepalLengthCm'],
+    y=data['SepalWidthCm'],
+    s=70,
+    color='#f73434',
+    edgecolor='#f73434',
+    linewidth=0.3
+)
+
+ax.set_ylabel('Sepal Width (in cm)')
+ax.set_xlabel('Sepal Length (in cm)')
+
+plt.title('Sepal Length vs Width', fontsize=20)
+
+plt.show()
+
+from sklearn.cluster import KMeans
+
+wcss = []
+
+for i in range(1, 11):
+    km = KMeans(i)
+    km.fit(clustering_data)
+    wcss.append(km.inertia_)
+
+np.array(wcss)
+
+fig, ax = plt.subplots(figsize=(15, 7))
+
+ax = plt.plot(
+    range(1, 11),
+    wcss,
+    linewidth=2,
+    color="red",
+    marker="8"
+)
+
+plt.axvline(x=3, ls='--')
+
+plt.ylabel('WCSS')
+plt.xlabel('No. of Clusters (k)')
+
+plt.title('The Elbow Method', fontsize=20)
+
+plt.show()
+
+from sklearn.cluster import KMeans
+
+kms = KMeans(n_clusters=3, init='kmeans++')
+
+kms = KMeans(
+    n_clusters=3,
+    init='k-means++',
+    random_state=42,
+    n_init=10
+)
+
+kms.fit(clustering_data)
+
+clusters = clustering_data.copy()
+
+clusters['Cluster_Prediction'] = kms.fit_predict(clustering_data)
+
+clusters.head()
+
+kms.cluster_centers_
+
+fig, ax = plt.subplots(figsize=(15, 7))
+
+plt.scatter(
+    x=clusters[clusters['Cluster_Prediction'] == 0]['SepalLengthCm'],
+    y=clusters[clusters['Cluster_Prediction'] == 0]['SepalWidthCm'],
+    s=70,
+    edgecolor='teal',
+    linewidth=0.3,
+    c='teal',
+    label='Iris-versicolor'
+)
+
+plt.scatter(
+    x=clusters[clusters['Cluster_Prediction'] == 1]['SepalLengthCm'],
+    y=clusters[clusters['Cluster_Prediction'] == 1]['SepalWidthCm'],
+    s=70,
+    edgecolor='lime',
+    linewidth=0.3,
+    c='lime',
+    label='Iris-setosa'
+)
+
+plt.scatter(
+    x=clusters[clusters['Cluster_Prediction'] == 2]['SepalLengthCm'],
+    y=clusters[clusters['Cluster_Prediction'] == 2]['SepalWidthCm'],
+    s=70,
+    edgecolor='magenta',
+    linewidth=0.3,
+    c='magenta',
+    label='Iris-virginica'
+)
+
+plt.scatter(
+    x=kms.cluster_centers_[:, 0],
+    y=kms.cluster_centers_[:, 1],
+    s=170,
+    c='yellow',
+    label='Centroids',
+    edgecolor='black',
+    linewidth=0.3
+)
+
+plt.legend(loc='upper right')
+
+plt.xlim(4, 8)
+plt.ylim(1.8, 4.5)
+
+ax.set_ylabel('Sepal Width (in cm)')
+ax.set_xlabel('Sepal Length (in cm)')
+
+plt.title('Clusters', fontsize=20)
+
+plt.show()
+
+# K-Means Clustering: An unsupervised learning algorithm that groups similar data points.
+# Clustering: Divides data into groups based on similarities.
+# Centroid: The center point of a cluster.
+# K: Represents the number of clusters.
+# WCSS: Measures the sum of squared distances between data points and their cluster centroids.
+# Elbow Method: Determines the optimal number of clusters using a WCSS graph.
+# Iris Dataset: Contains 150 flower samples belonging to three different species.
+# K-Means++: Selects better initial centroids to improve clustering.
+# Cluster Prediction: Assigns each data point to its nearest cluster.
+# Cluster Visualization: Displays clusters and their centroids using a scatter plot.
+
+# Import pandas to read and manipulate the dataset.
+# Import numpy to perform numerical operations.
+# Import matplotlib to create graphs and visualizations.
+# Import KMeans to implement the K-Means clustering algorithm.
+# Import seaborn to create statistical visualizations.
+
+# Load the Iris dataset from the CSV file.
+
+# Display the complete dataset.
+
+# Display the first five rows of the dataset.
+
+# Display the last five rows of the dataset.
+
+# Display the total number of records in the dataset.
+
+# Display the number of rows and columns in the dataset.
+
+# Display all column names.
+
+# Use a for loop to display column numbers and their names.
+
+# Display the data types of all columns.
+
+# Display dataset information including columns, data types and non-null values.
+
+# Display statistical information about numerical columns.
+
+# Check whether the dataset contains null values.
+
+# Count the number of missing values in each column.
+
+# Remove the unnecessary Id column from the dataset.
+
+# Display the updated dataset.
+
+# Check the number of missing values after removing the Id column.
+
+# Display the updated dataset again.
+
+# Count the number of samples belonging to each flower species.
+
+# Select the Species column as the target data.
+
+# Display the first five target values.
+
+# Select the four measurement columns as clustering data.
+
+# Display the first five rows of clustering data.
+
+# Create a figure with a size of 15 by 7 inches.
+
+# Set the font scale for the seaborn visualization.
+
+# Create a scatter plot showing Sepal Length and Sepal Width.
+
+# Set the marker size to 70.
+
+# Set the colour of the scatter plot to red.
+
+# Set the edge colour and line width of the markers.
+
+# Label the Y-axis as Sepal Width.
+
+# Label the X-axis as Sepal Length.
+
+# Set the title of the scatter plot.
+
+# Display the scatter plot.
+
+# Import the KMeans clustering algorithm.
+
+# Create an empty list to store WCSS values.
+
+# Run a loop for different numbers of clusters from 1 to 10.
+
+# Create a K-Means model for the current number of clusters.
+
+# Fit the model using the clustering data.
+
+# Store the WCSS value of the current model.
+
+# Convert the WCSS list into a NumPy array.
+
+# Create a figure for the Elbow Method graph.
+
+# Plot the number of clusters against their WCSS values.
+
+# Draw a vertical dashed line at 3 clusters.
+
+# Label the Y-axis as WCSS.
+
+# Label the X-axis as Number of Clusters.
+
+# Set the title of the Elbow Method graph.
+
+# Display the Elbow Method graph.
+
+# Import the KMeans clustering algorithm again.
+
+# Create a K-Means model with 3 clusters and the specified initialization.
+# This model is overwritten by the next KMeans initialization.
+
+# Create the final K-Means model with 3 clusters.
+# Use k-means++ initialization to select initial centroids.
+# Set random_state=42 to obtain reproducible results.
+# Set n_init=10 to run the algorithm 10 times.
+
+# Train the K-Means model using the clustering data.
+
+# Create a copy of the clustering data.
+
+# Predict cluster labels and add them as a new column.
+
+# Display the first five rows with their predicted cluster labels.
+
+# Display the coordinates of the cluster centers.
+
+# Create a figure for visualizing the clusters.
+
+# Plot the data points belonging to cluster 0 in teal colour.
+# Set the marker size, edge colour and label.
+
+# Plot the data points belonging to cluster 1 in lime colour.
+# Set the marker size, edge colour and label.
+
+# Plot the data points belonging to cluster 2 in magenta colour.
+# Set the marker size, edge colour and label.
+
+# Plot the cluster centroids in yellow colour.
+# Set the centroid marker size and add a black border.
+
+# Display the legend to identify the clusters and centroids.
+
+# Set the X-axis limits from 4 to 8.
+
+# Set the Y-axis limits from 1.8 to 4.5.
+
+# Label the Y-axis as Sepal Width.
+
+# Label the X-axis as Sepal Length.
+
+# Set the title of the final cluster visualization.
+
+# Display the final K-Means clustering graph.
