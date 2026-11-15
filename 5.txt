@@ -1,4 +1,4 @@
-
+!pip install xgboost
 # 1. Import necessary libraries
 
 import pandas as pd
